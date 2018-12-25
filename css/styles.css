@@ -1,0 +1,76 @@
+body,
+html,
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin: 20px;
+  display: flex;
+  width: 90%;
+  justify-content: space-between;
+  margin-bottom: 200px;
+}
+
+.container > div {
+  background-color: brown;
+  width: 200px;
+  height: 200px;
+}
+
+.t2 {
+  background-color: brown;
+  height: 500px;
+}
+
+.t3 {
+  background-color: brown;
+  width: 400px;
+  height: 900px;
+  margin-left: 20px;
+  margin-bottom: 200px;
+}
+
+.t4 {
+  background-color: brown;
+  width: 1400px;
+  height: 900px;
+  margin-left: 100px;
+  margin-bottom: 200px;
+}
+
+
+#canvas {
+  position: absolute;
+  top: 0;
+  z-index: -1;
+}
+
+
+.tutorial{
+  width: 100px;
+  height: 100px;
+  background-color: blueviolet;
+  margin-left: 20px;
+}
+
+.second{
+  margin-top: 1000px;
+  width: 100px;
+  height: 300px;
+}
+
+.third {
+  margin-top: 100px;
+  width: 1600px;
+  height: 900px;
+}
+
+.container2{
+ 
+  margin-top: 200px;
+  width: 1840px;
+  display: flex;
+  justify-content: space-between;
+}
