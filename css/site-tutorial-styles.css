@@ -1,12 +1,14 @@
 
 .control-panel {
+
   justify-content: space-around;
   align-items: center;
-  width: 350px;
-  height: 120px;
+  width: 450px;
+  height: 140px;
   border-radius: 10px;
   background-color: #fff;
   font-family: Raleway, sans-serif;
+  box-shadow: 0 0 15px 0 rgba(56, 56, 56, 0.288);
 }
 
 .control-panel .description {
@@ -79,22 +81,12 @@ width: 90%;
 }
 
 #progress-site-tutorial{
-  width: 80%;
+  width: 90%;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-#one-step-site-tutorial{
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: solid 1px #25a76a;
-}
-
-#line-site-tutorial{
-  height: 1px;
-  background-color: #25a76a;
-}
 
 #stop-site-tutorial{
   cursor: pointer;
