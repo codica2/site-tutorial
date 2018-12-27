@@ -1,7 +1,7 @@
 class SiteTutorial {
   constructor(config) {
     this.config = config;
-    this.blocks = document.querySelectorAll(".tutorial");
+    this.blocks = this.sortBlocks();
 
     this.body = document.body;
     this.html = document.documentElement;
@@ -22,7 +22,10 @@ class SiteTutorial {
     this.startPositionScroll =
       this.blocks[0].offsetTop - window.innerHeight / 2;
 
-    this.popup = config.popup;
+    if (!config.popup) this.body.appendChild(this.buildDefaultPopup());
+
+    this.popup = document.querySelector("#site-tutorial-control-panel");
+
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("id", "site-tutroial");
     this.ctx = this.canvas.getContext("2d");
@@ -37,6 +40,22 @@ class SiteTutorial {
       ) - this.popup.clientHeight;
 
     this.initialize(config);
+  }
+
+  sortBlocks() {
+    const blocks = document.querySelectorAll("[site-tutorial-step]");
+    let sortBlocks = [];
+
+    for (let i = 0; i < blocks.length; i++) {
+      sortBlocks.push(blocks[i]);
+    }
+
+    return sortBlocks.sort((a, b) => {
+      return (
+        +a.attributes["site-tutorial-step"].value -
+        +b.attributes["site-tutorial-step"].value
+      );
+    });
   }
 
   initialize(config) {
@@ -194,13 +213,15 @@ class SiteTutorial {
 
     // out click
 
-    document.addEventListener("click", function(event) {
-      let isClickInside = config.popup.contains(event.target);
-
-      if (!isClickInside && config.outclick) {
+    const outclick = event => {
+      let isClickInside = this.popup.contains(event.target);
+      console.log(true);
+      if (!isClickInside && this.config.outclick) {
         stop();
       }
-    });
+    };
+
+    document.addEventListener("click", outclick);
   }
 
   hidePopup(status) {
@@ -210,6 +231,52 @@ class SiteTutorial {
     } else {
       this.popup.style.opacity = 1;
     }
+  }
+
+  buildDefaultPopup() {
+    const controlPanel = document.createElement("div");
+    controlPanel.setAttribute("id", "site-tutorial-control-panel");
+
+    const description = document.createElement("div");
+    description.setAttribute("id", "description");
+
+    const p = document.createElement("p");
+    p.setAttribute("id", "desctirption-site-tutorial");
+
+    const stop = document.createElement("span");
+    stop.setAttribute("id", "stop-site-tutorial");
+
+    const nav = document.createElement("div");
+    nav.setAttribute("id", "nav");
+
+    const progressWrap = document.createElement("div");
+    progressWrap.setAttribute("id", "progress-wrap");
+
+    const progressLine = document.createElement("div");
+    progressLine.setAttribute("id", "progress-site-tutorial");
+
+    const groupButtons = document.createElement("div");
+    groupButtons.setAttribute("id", "group-buttons");
+
+    const prev = document.createElement("button");
+    prev.setAttribute("id", "prev-site-tutorial");
+    prev.innerHTML = "back";
+
+    const next = document.createElement("button");
+    next.setAttribute("id", "next-site-tutorial");
+    next.innerHTML = "next";
+
+    controlPanel.appendChild(description);
+    controlPanel.appendChild(nav);
+    description.appendChild(p);
+    description.appendChild(stop);
+    nav.appendChild(progressWrap);
+    nav.appendChild(groupButtons);
+    progressWrap.appendChild(progressLine);
+    groupButtons.appendChild(prev);
+    groupButtons.appendChild(next);
+
+    return controlPanel;
   }
 
   buildProgressBar() {
@@ -229,8 +296,8 @@ class SiteTutorial {
       cloneLine.style.backgroundColor = this.config.progressBar.color;
 
       cloneOneStep.style.border = "solid 1px " + this.config.progressBar.color;
-      cloneOneStep.style.width = "7px";
-      cloneOneStep.style.height = "7px";
+      cloneOneStep.style.minWidth = "7px";
+      cloneOneStep.style.minHeight = "7px";
       cloneOneStep.style.borderRadius = "50%";
 
       this.progress.appendChild(cloneOneStep);
@@ -484,12 +551,32 @@ class SiteTutorial {
       }
     };
 
-    const callback = () => {
-      this.config.steps[this.stepDescription] &&
-        this.config.steps[this.stepDescription].callback &&
-        this.config.steps[this.stepDescription].callback(nextDiv);
+    const callbackPromise = () => {
+      const callbackStep = new Promise(resolve => {
+        const call =
+          this.config.steps[this.stepDescription] &&
+          this.config.steps[this.stepDescription].callback;
 
-      this.config.callback(nextDiv, this.commonStep);
+        if (call) {
+          Promise.resolve(call(nextDiv))
+            .then(() => resolve(true))
+            .catch(err => console.error(err));
+        } else {
+          resolve(true);
+        }
+      });
+
+      const callbackCommon = new Promise(resolve => {
+        if (this.config.callback) {
+          Promise.resolve(this.config.callback(nextDiv, this.commonStep))
+            .then(() => resolve(true))
+            .catch(err => console.log(err));
+        } else {
+          resolve(true);
+        }
+      });
+
+      return Promise.all([callbackStep, callbackCommon]);
     };
 
     const firstDraw = () => {
@@ -505,18 +592,27 @@ class SiteTutorial {
       this.checkFinish = -1;
     };
 
+    const stopAnimate = () => {
+      this.prev.disabled = !(this.commonStep !== 0);
+      this.stop.disabled = false;
+      this.next.disabled = false;
+
+      this.checkFinish = -1;
+    };
+
     const commonDraw = () => {
       let newDiv = updateDiv(frame);
 
       if (newDiv.finish) {
-        callback();
-
-        this.prev.disabled = !(this.commonStep !== 0);
-        this.stop.disabled = false;
-        this.next.disabled = false;
+        callbackPromise()
+          .then(res => {
+            stopAnimate();
+          })
+          .catch(() => {
+            stopAnimate();
+          });
 
         clearInterval(this.animate);
-        this.checkFinish = -1;
 
         if (this.isHidePopup) {
           this.hidePopup("hide");
