@@ -74,19 +74,32 @@
   background-color: #84ac99;
 }
 
-
 #stop-site-tutorial{
   cursor: pointer;
   position: absolute;
+  height: 20px;
+  width: 20px;
   right: 5px;
   top: 5px;
-  fill: #25a76a;
 }
 
-#stop-site-tutorial:hover{
-  fill: #173f2c;
+#stop-site-tutorial:before, #stop-site-tutorial:after {
+  position: absolute;
+  left: 9px;
+  content: " ";
+  height: 20px;
+  width: 2px;
+  background-color: #25a76a;
 }
 
-#stop-site-tutorial path {
-  cursor: pointer;
+#stop-site-tutorial:before {
+  transform: rotate(45deg);
+}
+
+#stop-site-tutorial:after {
+  transform: rotate(-45deg);
+}
+
+#stop-site-tutorial:hover:after, #stop-site-tutorial:hover:before{
+  background-color: #173f2c;
 }

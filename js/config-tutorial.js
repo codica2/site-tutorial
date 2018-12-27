@@ -3,7 +3,6 @@ const div = document.querySelector("#site-tutorial-control-panel");
 // improvements
 
 // add arrow
-// add close to default popup
 // title and description from attribute
 // updating initialize after adding block tutorial
 
