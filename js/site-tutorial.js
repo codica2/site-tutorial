@@ -215,7 +215,7 @@ class SiteTutorial {
 
     const outclick = event => {
       let isClickInside = this.popup.contains(event.target);
-      console.log(true);
+
       if (!isClickInside && this.config.outclick) {
         stop();
       }
@@ -281,6 +281,10 @@ class SiteTutorial {
 
   buildProgressBar() {
     this.progress = document.querySelector("#progress-site-tutorial");
+    this.progress.style.width = "100%";
+    this.progress.style.display = "flex";
+    this.progress.style.alignItems = "center";
+    this.progress.style.justifyContent = "center";
 
     const oneStep = document.createElement("div");
     oneStep.setAttribute("id", "one-step-site-tutorial");

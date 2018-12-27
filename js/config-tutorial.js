@@ -7,7 +7,6 @@ const div = document.querySelector("#site-tutorial-control-panel");
 // keyboard control
 // title and description from attribute
 // rename autoPlay to autoStart
-// fix progress bar styles flex
 // updating initialize after adding block tutorial
 
 const configs = {
