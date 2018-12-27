@@ -158,7 +158,7 @@ class SiteTutorial {
 
     // button next
 
-    this.next.addEventListener("click", () => {
+    const next = () => {
       if (
         this.checkFinish === -1 &&
         this.isStarted &&
@@ -176,11 +176,16 @@ class SiteTutorial {
 
       this.commonStep === this.blocks.length - 1 && stop();
       updateTextButtons();
+    };
+
+    this.next.addEventListener("click", next);
+    this.body.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") next();
     });
 
     // button prev
 
-    this.prev.addEventListener("click", () => {
+    const prev = () => {
       if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
         this.stepProgressBar -= 2;
         this.stepDescription -= 1;
@@ -193,6 +198,11 @@ class SiteTutorial {
       }
 
       updateTextButtons();
+    };
+
+    this.prev.addEventListener("click", prev);
+    this.body.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft") prev();
     });
 
     // hide popup
