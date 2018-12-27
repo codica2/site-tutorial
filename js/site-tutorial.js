@@ -164,6 +164,8 @@ class SiteTutorial {
         this.isStarted &&
         this.commonStep < this.blocks.length - 1
       ) {
+        this.hidePopup("show");
+        this.isShowPopup = true;
         this.stepProgressBar += 2;
         this.stepDescription += 1;
 
@@ -187,6 +189,8 @@ class SiteTutorial {
 
     const prev = () => {
       if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
+        this.hidePopup("show");
+        this.isShowPopup = true;
         this.stepProgressBar -= 2;
         this.stepDescription -= 1;
 
