@@ -4,9 +4,7 @@ const div = document.querySelector("#site-tutorial-control-panel");
 
 // add arrow
 // add close to default popup
-// keyboard control
 // title and description from attribute
-// rename autoPlay to autoStart
 // updating initialize after adding block tutorial
 
 const configs = {
@@ -16,7 +14,7 @@ const configs = {
   padding: 10, // 15
   opacityBackground: 0.7, // 0.7
   outclick: false, // false
-  autoPlay: false, // false
+  autoStart: false, // false
   progressBar: {
     color: "#25a76a" //false
   },

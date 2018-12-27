@@ -124,7 +124,7 @@ class SiteTutorial {
       }
     };
 
-    config.autoPlay && start();
+    config.autoStart && start();
 
     this.start.addEventListener("click", start);
 
