@@ -266,6 +266,9 @@ class SiteTutorial {
     const description = document.createElement("div");
     description.setAttribute("id", "description");
 
+    const h = document.createElement("h");
+    h.setAttribute("id", "title-site-tutorial");
+
     const p = document.createElement("p");
     p.setAttribute("id", "desctirption-site-tutorial");
 
@@ -294,6 +297,7 @@ class SiteTutorial {
 
     controlPanel.appendChild(description);
     controlPanel.appendChild(nav);
+    description.appendChild(h);
     description.appendChild(p);
     description.appendChild(stop);
     nav.appendChild(progressWrap);
@@ -354,13 +358,18 @@ class SiteTutorial {
     this.popup.style.transitionDuration = "";
 
     const description = document.querySelector("#desctirption-site-tutorial");
-    if (
-      this.config.steps[this.stepDescription] &&
-      this.config.steps[this.stepDescription].text
-    ) {
-      description.innerHTML = this.config.steps[this.stepDescription].text;
+    const title = document.querySelector("#title-site-tutorial");
+    if (this.config.steps[this.stepDescription]) {
+      if (this.config.steps[this.stepDescription].text) {
+        description.innerHTML = this.config.steps[this.stepDescription].text;
+      }
+
+      if (this.config.steps[this.stepDescription].title) {
+        title.innerHTML = this.config.steps[this.stepDescription].title;
+      }
     } else {
       description.innerHTML = "";
+      title.innerHTML = "";
     }
   }
 

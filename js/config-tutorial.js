@@ -5,7 +5,6 @@ const div = document.querySelector("#site-tutorial-control-panel");
 // add arrow
 // title and description from attribute
 // updating initialize after adding block tutorial
-// drop eventListener after stop
 
 const configs = {
   popup: div, // default popup
@@ -21,6 +20,7 @@ const configs = {
   steps: {
     //false
     0: {
+      title: "TITLE",
       text: "DIV 1",
       callback: function(nodeElem) {
         // return new Promise((resolve, reject) => {
