@@ -359,17 +359,37 @@ class SiteTutorial {
 
     const description = document.querySelector("#desctirption-site-tutorial");
     const title = document.querySelector("#title-site-tutorial");
-    if (this.config.steps[this.stepDescription]) {
-      if (this.config.steps[this.stepDescription].text) {
-        description.innerHTML = this.config.steps[this.stepDescription].text;
-      }
 
-      if (this.config.steps[this.stepDescription].title) {
-        title.innerHTML = this.config.steps[this.stepDescription].title;
-      }
+    const propTitle =
+      this.config.steps[this.stepDescription] &&
+      this.config.steps[this.stepDescription].title;
+
+    const propText =
+      this.config.steps[this.stepDescription] &&
+      this.config.steps[this.stepDescription].text;
+
+    const attrTitle =
+      this.blocks[this.stepDescription].attributes["tutorial-title"] &&
+      this.blocks[this.stepDescription].attributes["tutorial-title"].value;
+
+    const attrDescription =
+      this.blocks[this.stepDescription].attributes["tutorial-text"] &&
+      this.blocks[this.stepDescription].attributes["tutorial-text"].value;
+
+    if (propTitle) {
+      title.innerHTML = this.config.steps[this.stepDescription].title;
+    } else if (attrTitle) {
+      title.innerHTML = attrTitle;
+    } else {
+      title.innerHTML = "";
+    }
+
+    if (propText) {
+      description.innerHTML = this.config.steps[this.stepDescription].text;
+    } else if (attrDescription) {
+      description.innerHTML = attrDescription;
     } else {
       description.innerHTML = "";
-      title.innerHTML = "";
     }
   }
 
