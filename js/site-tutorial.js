@@ -39,38 +39,33 @@ class SiteTutorial {
         this.html.offsetHeight
       ) - this.popup.clientHeight;
 
+    this.handleNext = this.next.bind(this);
+    this.handlePrev = this.prev.bind(this);
+    this.handleKeydownArrowRight = this.keydownArrowRight.bind(this);
+    this.handleKeydownArrowLeft = this.keydownArrowLeft.bind(this);
+    this.handleMouseMovePopup = this.mouseMovePopup.bind(this);
+    this.handleMoseLeavePopup = this.mouseLeavePopup.bind(this);
+    this.handleOutclick = this.outclick.bind(this);
+    this.handleStop = this.stop.bind(this);
+
     this.initialize(config);
   }
 
-  sortBlocks() {
-    const blocks = document.querySelectorAll("[site-tutorial-step]");
-    let sortBlocks = [];
-
-    for (let i = 0; i < blocks.length; i++) {
-      sortBlocks.push(blocks[i]);
-    }
-
-    return sortBlocks.sort((a, b) => {
-      return (
-        +a.attributes["site-tutorial-step"].value -
-        +b.attributes["site-tutorial-step"].value
-      );
-    });
-  }
-
   initialize(config) {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = this.commonHeightDocument;
-    this.canvas.style.position = "absolute";
-    this.canvas.style.zIndex = config.zIndex ? config.zIndex : 1000;
-    this.canvas.style.top = "0px";
-    this.canvas.style.left = "0px";
-    this.canvas.style.display = "none";
+    const { canvas, popup, body } = this;
 
-    this.body.appendChild(this.canvas);
+    canvas.width = window.innerWidth;
+    canvas.height = this.commonHeightDocument;
+    canvas.style.position = "absolute";
+    canvas.style.zIndex = config.zIndex ? config.zIndex : 1000;
+    canvas.style.top = "0px";
+    canvas.style.left = "0px";
+    canvas.style.display = "none";
 
-    this.popup.style.position = "absolute";
-    this.popup.style.visibility = "hidden";
+    body.appendChild(canvas);
+
+    popup.style.position = "absolute";
+    popup.style.visibility = "hidden";
 
     this.defaultPopTop =
       this.blocks[0].offsetTop +
@@ -79,14 +74,14 @@ class SiteTutorial {
       "px";
     this.defaultPopLeft = -this.popup.offsetWidth + "px";
 
-    this.popup.style.top = this.defaultPopTop;
-    this.popup.style.left = this.defaultPopLeft;
-    this.popup.style.zIndex = this.canvas.style.zIndex + 1;
+    popup.style.top = this.defaultPopTop;
+    popup.style.left = this.defaultPopLeft;
+    popup.style.zIndex = this.canvas.style.zIndex + 1;
 
-    this.prev = document.querySelector("#prev-site-tutorial");
-    this.start = document.querySelector("#start-site-tutorial");
-    this.next = document.querySelector("#next-site-tutorial");
-    this.stop = document.querySelector("#stop-site-tutorial");
+    this.buttonPrev = document.querySelector("#prev-site-tutorial");
+    this.buttonStart = document.querySelector("#start-site-tutorial");
+    this.buttonNext = document.querySelector("#next-site-tutorial");
+    this.buttonStop = document.querySelector("#stop-site-tutorial");
 
     this.defaultButtonNextText = this.next.innerHTML;
     this.stepDescription = 0;
@@ -96,146 +91,163 @@ class SiteTutorial {
       this.buildProgressBar();
     }
 
-    const updateTextButtons = () => {
-      if (this.commonStep === this.blocks.length - 1) {
-        this.next.innerHTML = "finish";
-      } else {
-        this.next.innerHTML = this.defaultButtonNextText;
-      }
-    };
-
     // button start
+    this.config.autoStart && this.start().bind(this);
+    this.buttonStart.addEventListener("click", this.start.bind(this));
+  }
 
-    const start = () => {
-      this.canvas.style.zIndex = config.zIndex;
-      this.canvas.style.display = "block";
-      this.popup.style.visibility = "visible";
-      this.body.style.overflow = "hidden";
+  addEventListeners() {
+    this.buttonNext.addEventListener("click", this.handleNext);
+    document.addEventListener("keydown", this.handleKeydownArrowRight);
 
-      config.progressBar && this.updateProgress();
+    this.buttonPrev.addEventListener("click", this.handlePrev);
+    this.body.addEventListener("keydown", this.handleKeydownArrowLeft);
+
+    this.popup.addEventListener("mousemove", this.handleMouseMovePopup);
+    this.popup.addEventListener("mouseleave", this.handleMoseLeavePopup);
+
+    this.buttonStop.addEventListener("click", this.handleStop);
+
+    document.addEventListener("click", this.handleOutclick);
+  }
+
+  removeEventListeners() {
+    this.buttonNext.removeEventListener("click", this.handleNext);
+    document.removeEventListener("keydown", this.handleKeydownArrowRight);
+
+    this.buttonPrev.removeEventListener("click", this.handlePrev);
+    this.body.removeEventListener("keydown", this.handleKeydownArrowLeft);
+
+    this.popup.removeEventListener("mousemove", this.handleMouseMovePopup);
+    this.popup.removeEventListener("mouseleave", this.handleMoseLeavePopup);
+
+    this.buttonStop.removeEventListener("click", this.handleStop);
+
+    document.removeEventListener("click", this.handleOutclick);
+  }
+
+  mouseLeavePopup() {
+    if (this.isHidePopup && this.isShowPopup && this.checkFinish === -1) {
+      this.hidePopup("hide");
+      this.isShowPopup = false;
+    }
+  }
+
+  mouseMovePopup() {
+    if (this.isHidePopup && this.checkFinish === -1) {
+      this.hidePopup("show");
+      this.isShowPopup = true;
+    }
+  }
+
+  keydownArrowRight(e) {
+    console.log(true);
+    if (e.key === "ArrowRight") this.next();
+  }
+
+  keydownArrowLeft(e) {
+    if (e.key === "ArrowLeft") this.prev();
+  }
+
+  next() {
+    if (
+      this.checkFinish === -1 &&
+      this.isStarted &&
+      this.commonStep < this.blocks.length - 1
+    ) {
+      this.hidePopup("show");
+      this.isShowPopup = true;
+      this.stepProgressBar += 2;
+      this.stepDescription += 1;
+
+      this.config.progressBar && this.updateProgress();
       this.updateDescription();
-      updateTextButtons();
+      this.startAnimation(this.commonStep, "next");
 
-      if (!this.isStarted) {
-        window.scroll(0, this.startPositionScroll);
-        this.startAnimation(this.commonStep, "next");
-        this.isStarted = true;
-        this.commonStep++;
-      }
-    };
+      this.commonStep++;
+    }
 
-    config.autoStart && start();
+    this.commonStep === this.blocks.length - 1 && stop();
+    this.updateTextButtons();
+  }
 
-    this.start.addEventListener("click", start);
+  prev() {
+    if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
+      this.hidePopup("show");
+      this.isShowPopup = true;
+      this.stepProgressBar -= 2;
+      this.stepDescription -= 1;
 
-    // button stop
+      this.config.progressBar && this.updateProgress();
+      this.updateDescription();
+      this.startAnimation(this.commonStep, "prev");
 
-    const stop = () => {
-      if (this.checkFinish === -1 && this.isStarted) {
-        this.popup.style.top = this.defaultPopTop;
-        this.popup.style.left = this.defaultPopLeft;
-        this.popup.style.transitionDuration = "";
-        this.popup.style.visibility = "hidden";
-        this.isHidePopup = false;
+      this.commonStep--;
+    }
 
-        this.canvas.style.zIndex = -1;
-        this.canvas.style.display = "none";
+    this.updateTextButtons();
+  }
 
-        this.body.style.overflow = "visible";
+  start() {
+    this.canvas.style.zIndex = this.config.zIndex;
+    this.canvas.style.display = "block";
+    this.popup.style.visibility = "visible";
+    this.body.style.overflow = "hidden";
 
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (!this.isStarted) {
+      this.addEventListeners();
 
-        this.isStarted = false;
-        this.commonStep = -1;
-        this.stepProgressBar = 0;
-        this.stepDescription = 0;
+      this.config.progressBar && this.updateProgress();
+      this.updateDescription();
+      this.updateTextButtons();
 
-        window.scroll(0, 0);
-      }
-    };
+      window.scroll(0, this.startPositionScroll);
+      this.startAnimation(this.commonStep, "next");
+      this.isStarted = true;
+      this.commonStep++;
+    }
+  }
 
-    this.stop.addEventListener("click", stop);
+  stop() {
+    if (this.checkFinish === -1 && this.isStarted) {
+      this.popup.style.top = this.defaultPopTop;
+      this.popup.style.left = this.defaultPopLeft;
+      this.popup.style.transitionDuration = "";
+      this.popup.style.visibility = "hidden";
+      this.isHidePopup = false;
 
-    // button next
+      this.canvas.style.zIndex = -1;
+      this.canvas.style.display = "none";
 
-    const next = () => {
-      if (
-        this.checkFinish === -1 &&
-        this.isStarted &&
-        this.commonStep < this.blocks.length - 1
-      ) {
-        this.hidePopup("show");
-        this.isShowPopup = true;
-        this.stepProgressBar += 2;
-        this.stepDescription += 1;
+      this.body.style.overflow = "visible";
 
-        config.progressBar && this.updateProgress();
-        this.updateDescription();
-        this.startAnimation(this.commonStep, "next");
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.commonStep++;
-      }
+      this.isStarted = false;
+      this.commonStep = -1;
+      this.stepProgressBar = 0;
+      this.stepDescription = 0;
 
-      this.commonStep === this.blocks.length - 1 && stop();
-      updateTextButtons();
-    };
+      this.removeEventListeners();
 
-    this.next.addEventListener("click", next);
-    this.body.addEventListener("keydown", e => {
-      if (e.key === "ArrowRight") next();
-    });
+      window.scroll(0, 0);
+    }
+  }
 
-    // button prev
+  outclick() {
+    let isClickInside = this.popup.contains(event.target);
 
-    const prev = () => {
-      if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
-        this.hidePopup("show");
-        this.isShowPopup = true;
-        this.stepProgressBar -= 2;
-        this.stepDescription -= 1;
+    if (!isClickInside && this.config.outclick) {
+      this.stop();
+    }
+  }
 
-        config.progressBar && this.updateProgress();
-        this.updateDescription();
-        this.startAnimation(this.commonStep, "prev");
-
-        this.commonStep--;
-      }
-
-      updateTextButtons();
-    };
-
-    this.prev.addEventListener("click", prev);
-    this.body.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft") prev();
-    });
-
-    // hide popup
-
-    this.popup.addEventListener("mousemove", () => {
-      if (this.isHidePopup && this.checkFinish === -1) {
-        this.hidePopup("show");
-        this.isShowPopup = true;
-      }
-    });
-
-    this.popup.addEventListener("mouseleave", () => {
-      if (this.isHidePopup && this.isShowPopup && this.checkFinish === -1) {
-        this.hidePopup("hide");
-        this.isShowPopup = false;
-      }
-    });
-
-    // out click
-
-    const outclick = event => {
-      let isClickInside = this.popup.contains(event.target);
-
-      if (!isClickInside && this.config.outclick) {
-        stop();
-      }
-    };
-
-    document.addEventListener("click", outclick);
+  updateTextButtons() {
+    if (this.commonStep === this.blocks.length - 1) {
+      this.next.innerHTML = "finish";
+    } else {
+      this.next.innerHTML = this.defaultButtonNextText;
+    }
   }
 
   hidePopup(status) {
@@ -352,10 +364,26 @@ class SiteTutorial {
     }
   }
 
+  sortBlocks() {
+    const blocks = document.querySelectorAll("[site-tutorial-step]");
+    let sortBlocks = [];
+
+    for (let i = 0; i < blocks.length; i++) {
+      sortBlocks.push(blocks[i]);
+    }
+
+    return sortBlocks.sort((a, b) => {
+      return (
+        +a.attributes["site-tutorial-step"].value -
+        +b.attributes["site-tutorial-step"].value
+      );
+    });
+  }
+
   startAnimation(commonStep, stepTo) {
-    this.next.disabled = true;
-    this.prev.disabled = true;
-    this.stop.disabled = true;
+    this.buttonNext.disabled = true;
+    this.buttonPrev.disabled = true;
+    this.buttonStop.disabled = true;
 
     let div;
     let step;
@@ -577,20 +605,20 @@ class SiteTutorial {
 
         if (call) {
           Promise.resolve(call(nextDiv))
-            .then(() => resolve(true))
+            .then(() => resolve())
             .catch(err => console.error(err));
         } else {
-          resolve(true);
+          resolve();
         }
       });
 
       const callbackCommon = new Promise(resolve => {
         if (this.config.callback) {
           Promise.resolve(this.config.callback(nextDiv, this.commonStep))
-            .then(() => resolve(true))
+            .then(() => resolve())
             .catch(err => console.log(err));
         } else {
-          resolve(true);
+          resolve();
         }
       });
 
@@ -611,9 +639,9 @@ class SiteTutorial {
     };
 
     const stopAnimate = () => {
-      this.prev.disabled = !(this.commonStep !== 0);
-      this.stop.disabled = false;
-      this.next.disabled = false;
+      this.buttonPrev.disabled = !(this.commonStep !== 0);
+      this.buttonStop.disabled = false;
+      this.buttonNext.disabled = false;
 
       this.checkFinish = -1;
     };
@@ -623,7 +651,7 @@ class SiteTutorial {
 
       if (newDiv.finish) {
         callbackPromise()
-          .then(res => {
+          .then(() => {
             stopAnimate();
           })
           .catch(() => {
