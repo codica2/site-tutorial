@@ -6,9 +6,14 @@ class SiteTutorial {
     this.body = document.body;
     this.html = document.documentElement;
 
-    this.padding = config.padding > 15 ? 15 : Math.max(0, config.padding);
+    this.padding =
+      config.padding > 15
+        ? 15
+        : config.padding
+        ? Math.max(0, config.padding)
+        : 10;
     this.offset = 10;
-    this.time = config.time || 1500;
+    this.time = config.time || 1000;
     this.frame_rate = 0.06; // 60 FPS
 
     this.animate;
@@ -141,7 +146,6 @@ class SiteTutorial {
   }
 
   keydownArrowRight(e) {
-    console.log(true);
     if (e.key === "ArrowRight") this.next();
   }
 
@@ -361,10 +365,12 @@ class SiteTutorial {
     const title = document.querySelector("#title-site-tutorial");
 
     const propTitle =
+      this.config.steps &&
       this.config.steps[this.stepDescription] &&
       this.config.steps[this.stepDescription].title;
 
     const propText =
+      this.config.steps &&
       this.config.steps[this.stepDescription] &&
       this.config.steps[this.stepDescription].text;
 
@@ -473,10 +479,9 @@ class SiteTutorial {
 
       if (
         divY + nextDivHeight / 2 >
-        window.pageYOffset + window.innerHeight / 2
+          window.pageYOffset + window.innerHeight / 2 ||
+        divY !== nextDivY
       ) {
-        window.scroll(0, divY - window.innerHeight / 2 + divHeight / 2);
-      } else if (divY !== nextDivY) {
         window.scroll(0, divY - window.innerHeight / 2 + divHeight / 2);
       }
 
@@ -571,9 +576,13 @@ class SiteTutorial {
       let finishY = nextDivY + nextDivHeight + offset * 2;
 
       const topPos = nextDivY - pH - offset;
-      const bottomPos = nextDivY + nextDivHeight + offset + pH;
+      const bottomPos = nextDivY + nextDivHeight + offset + padding + pH;
       const leftPos = nextDivX - pW - offset - padding;
       const rightPos = nextDivX + nextDivWidth + pW + offset + padding;
+      const finScroll = Math.max(
+        0,
+        Math.floor(nextDivY - window.innerHeight / 2 + nextDivHeight / 2)
+      );
 
       setPositionPopup = setPositionPopup.bind(this);
 
@@ -588,29 +597,26 @@ class SiteTutorial {
       function setPositionPopup(startX, finishX, startY, finishY) {
         let centerHeightDiv = nextDivY + nextDivHeight / 2 - pH / 2;
 
-        if (
+        if (bottomPos > commonHeightDocument) {
+          finishY = nextDivY - pH - offset - padding;
+        } else if (
           topPos < nextDivY &&
-          bottomPos > windowH + nextDivY &&
+          bottomPos > windowH + finScroll &&
           rightPos < windowW
         ) {
           finishY = centerHeightDiv;
           finishX = nextDivX + nextDivWidth + offset + padding;
         } else if (
           topPos < nextDivY &&
-          bottomPos > windowH + nextDivY - pH - offset - padding &&
+          bottomPos > windowH + finScroll &&
           leftPos < 0
         ) {
           finishY = centerHeightDiv;
           finishX = nextDivX - pW - padding - leftPos;
           this.isHidePopup = true;
-        } else if (topPos < nextDivY && bottomPos > windowH + nextDivY) {
+        } else if (topPos < nextDivY && bottomPos > windowH + finScroll) {
           finishY = centerHeightDiv;
           finishX = nextDivX - pW - offset - padding;
-        } else if (
-          nextDivY + nextDivHeight + pH + offset >
-          commonHeightDocument
-        ) {
-          finishY = nextDivY - pH - offset - padding;
         }
 
         x = x + delta(startX, finishX) * framePopup;

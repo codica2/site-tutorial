@@ -1,16 +1,10 @@
 const div = document.querySelector("#site-tutorial-control-panel");
 
-// improvements
-
-// add arrow
-// title and description from attribute
-// updating initialize after adding block tutorial
-
 const configs = {
   popup: div, // default popup
   zIndex: 1000, // 1000
-  time: 1000, // 1500
-  padding: 10, // 15
+  time: 1000, // 1000
+  padding: 10, // 10
   opacityBackground: 0.7, // 0.7
   outclick: false, // false
   autoStart: false, // false
@@ -20,8 +14,8 @@ const configs = {
   steps: {
     //false
     0: {
-      title: "TITLE",
-      text: "DIV 1",
+      title: null,
+      text: null,
       callback: function(nodeElem) {
         // return new Promise((resolve, reject) => {
         //   setTimeout(() => {
