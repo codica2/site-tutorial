@@ -1,6 +1,4 @@
-
-.control-panel {
-
+#site-tutorial-control-panel {
   justify-content: space-around;
   align-items: center;
   width: 450px;
@@ -11,17 +9,17 @@
   box-shadow: 0 0 15px 0 rgba(56, 56, 56, 0.288);
 }
 
-.control-panel .description {
+#site-tutorial-control-panel #description {
   padding: 10px;
   box-sizing: border-box;
   height: 65%
 }
 
-.control-panel .description p{
-width: 90%;
+#site-tutorial-control-panel #description p{
+  width: 90%;
 }
 
-.control-panel .nav{
+#site-tutorial-control-panel #nav {
   display: flex;
   align-items: center;
   background-color: #f9f9f9;
@@ -30,20 +28,21 @@ width: 90%;
   height: 35%;
 }
 
-.control-panel .progress{
-  
-  padding: 5px;
+#site-tutorial-control-panel #progress-wrap{
+  padding: 5px 20px;
   box-sizing: border-box;
   width: 70%;
+  display: flex;
+  justify-content: center;
 }
 
-.control-panel .group-buttons{
+#site-tutorial-control-panel #group-buttons{
   display: flex;
   height: 100%;
   width: 30%;
 }
 
-.control-panel .group-buttons button {
+#site-tutorial-control-panel #group-buttons button {
   outline: none;
   border: none;
   text-transform: uppercase;
@@ -52,55 +51,55 @@ width: 90%;
   cursor: pointer;
 }
 
-#prev-site-tutorial:hover {
+#site-tutorial-control-panel #prev-site-tutorial:hover {
   background-color: rgb(201, 201, 201);
 }
 
-#next-site-tutorial {
+#site-tutorial-control-panel #next-site-tutorial {
   background-color: #45b681;
   color: #fff;
   border-bottom-right-radius: 10px;
 }
 
-#next-site-tutorial:hover {
+#site-tutorial-control-panel #next-site-tutorial:hover {
   background-color: #25a76a;
 }
 
-#next-site-tutorial:active {
+#site-tutorial-control-panel #next-site-tutorial:active {
   background-color: #309968;
 }
 
-#next-site-tutorial:disabled,
-#next-site-tutorial[disabled]{
+#site-tutorial-control-panel #next-site-tutorial:disabled,
+#site-tutorial-control-panel #next-site-tutorial[disabled]{
   background-color: #84ac99;
 }
-
-.progress{
-  display: flex;
-  justify-content: center;
-}
-
-#progress-site-tutorial{
-  width: 90%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 
 #stop-site-tutorial{
   cursor: pointer;
   position: absolute;
+  height: 20px;
+  width: 20px;
   right: 5px;
   top: 5px;
-  fill: #25a76a;
 }
 
-#stop-site-tutorial:hover{
-  fill: #173f2c;
+#stop-site-tutorial:before, #stop-site-tutorial:after {
+  position: absolute;
+  left: 9px;
+  content: " ";
+  height: 20px;
+  width: 2px;
+  background-color: #25a76a;
 }
 
-#stop-site-tutorial path {
-  cursor: pointer;
+#stop-site-tutorial:before {
+  transform: rotate(45deg);
 }
 
+#stop-site-tutorial:after {
+  transform: rotate(-45deg);
+}
+
+#stop-site-tutorial:hover:after, #stop-site-tutorial:hover:before{
+  background-color: #173f2c;
+}

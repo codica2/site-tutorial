@@ -1,14 +1,19 @@
 class SiteTutorial {
   constructor(config) {
     this.config = config;
-    this.blocks = document.querySelectorAll(".tutorial");
+    this.blocks = this.sortBlocks();
 
     this.body = document.body;
     this.html = document.documentElement;
 
-    this.padding = config.padding > 15 ? 15 : Math.max(0, config.padding);
+    this.padding =
+      config.padding > 15
+        ? 15
+        : config.padding
+        ? Math.max(0, config.padding)
+        : 10;
     this.offset = 10;
-    this.time = config.time || 1500;
+    this.time = config.time || 1000;
     this.frame_rate = 0.06; // 60 FPS
 
     this.animate;
@@ -22,7 +27,10 @@ class SiteTutorial {
     this.startPositionScroll =
       this.blocks[0].offsetTop - window.innerHeight / 2;
 
-    this.popup = config.popup;
+    if (!config.popup) this.body.appendChild(this.buildDefaultPopup());
+
+    this.popup = document.querySelector("#site-tutorial-control-panel");
+
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("id", "site-tutroial");
     this.ctx = this.canvas.getContext("2d");
@@ -36,22 +44,33 @@ class SiteTutorial {
         this.html.offsetHeight
       ) - this.popup.clientHeight;
 
+    this.handleNext = this.next.bind(this);
+    this.handlePrev = this.prev.bind(this);
+    this.handleKeydownArrowRight = this.keydownArrowRight.bind(this);
+    this.handleKeydownArrowLeft = this.keydownArrowLeft.bind(this);
+    this.handleMouseMovePopup = this.mouseMovePopup.bind(this);
+    this.handleMoseLeavePopup = this.mouseLeavePopup.bind(this);
+    this.handleOutclick = this.outclick.bind(this);
+    this.handleStop = this.stop.bind(this);
+
     this.initialize(config);
   }
 
   initialize(config) {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = this.commonHeightDocument;
-    this.canvas.style.position = "absolute";
-    this.canvas.style.zIndex = config.zIndex ? config.zIndex : 1000;
-    this.canvas.style.top = "0px";
-    this.canvas.style.left = "0px";
-    this.canvas.style.display = "none";
+    const { canvas, popup, body } = this;
 
-    this.body.appendChild(this.canvas);
+    canvas.width = window.innerWidth;
+    canvas.height = this.commonHeightDocument;
+    canvas.style.position = "absolute";
+    canvas.style.zIndex = config.zIndex ? config.zIndex : 1000;
+    canvas.style.top = "0px";
+    canvas.style.left = "0px";
+    canvas.style.display = "none";
 
-    this.popup.style.position = "absolute";
-    this.popup.style.visibility = "hidden";
+    body.appendChild(canvas);
+
+    popup.style.position = "absolute";
+    popup.style.visibility = "hidden";
 
     this.defaultPopTop =
       this.blocks[0].offsetTop +
@@ -60,14 +79,14 @@ class SiteTutorial {
       "px";
     this.defaultPopLeft = -this.popup.offsetWidth + "px";
 
-    this.popup.style.top = this.defaultPopTop;
-    this.popup.style.left = this.defaultPopLeft;
-    this.popup.style.zIndex = this.canvas.style.zIndex + 1;
+    popup.style.top = this.defaultPopTop;
+    popup.style.left = this.defaultPopLeft;
+    popup.style.zIndex = this.canvas.style.zIndex + 1;
 
-    this.prev = document.querySelector("#prev-site-tutorial");
-    this.start = document.querySelector("#start-site-tutorial");
-    this.next = document.querySelector("#next-site-tutorial");
-    this.stop = document.querySelector("#stop-site-tutorial");
+    this.buttonPrev = document.querySelector("#prev-site-tutorial");
+    this.buttonStart = document.querySelector("#start-site-tutorial");
+    this.buttonNext = document.querySelector("#next-site-tutorial");
+    this.buttonStop = document.querySelector("#stop-site-tutorial");
 
     this.defaultButtonNextText = this.next.innerHTML;
     this.stepDescription = 0;
@@ -77,130 +96,162 @@ class SiteTutorial {
       this.buildProgressBar();
     }
 
-    const updateTextButtons = () => {
-      if (this.commonStep === this.blocks.length - 1) {
-        this.next.innerHTML = "finish";
-      } else {
-        this.next.innerHTML = this.defaultButtonNextText;
-      }
-    };
-
     // button start
+    this.config.autoStart && this.start().bind(this);
+    this.buttonStart.addEventListener("click", this.start.bind(this));
+  }
 
-    const start = () => {
-      this.canvas.style.zIndex = config.zIndex;
-      this.canvas.style.display = "block";
-      this.popup.style.visibility = "visible";
-      this.body.style.overflow = "hidden";
+  addEventListeners() {
+    this.buttonNext.addEventListener("click", this.handleNext);
+    document.addEventListener("keydown", this.handleKeydownArrowRight);
 
-      config.progressBar && this.updateProgress();
+    this.buttonPrev.addEventListener("click", this.handlePrev);
+    this.body.addEventListener("keydown", this.handleKeydownArrowLeft);
+
+    this.popup.addEventListener("mousemove", this.handleMouseMovePopup);
+    this.popup.addEventListener("mouseleave", this.handleMoseLeavePopup);
+
+    this.buttonStop.addEventListener("click", this.handleStop);
+
+    document.addEventListener("click", this.handleOutclick);
+  }
+
+  removeEventListeners() {
+    this.buttonNext.removeEventListener("click", this.handleNext);
+    document.removeEventListener("keydown", this.handleKeydownArrowRight);
+
+    this.buttonPrev.removeEventListener("click", this.handlePrev);
+    this.body.removeEventListener("keydown", this.handleKeydownArrowLeft);
+
+    this.popup.removeEventListener("mousemove", this.handleMouseMovePopup);
+    this.popup.removeEventListener("mouseleave", this.handleMoseLeavePopup);
+
+    this.buttonStop.removeEventListener("click", this.handleStop);
+
+    document.removeEventListener("click", this.handleOutclick);
+  }
+
+  mouseLeavePopup() {
+    if (this.isHidePopup && this.isShowPopup && this.checkFinish === -1) {
+      this.hidePopup("hide");
+      this.isShowPopup = false;
+    }
+  }
+
+  mouseMovePopup() {
+    if (this.isHidePopup && this.checkFinish === -1) {
+      this.hidePopup("show");
+      this.isShowPopup = true;
+    }
+  }
+
+  keydownArrowRight(e) {
+    if (e.key === "ArrowRight") this.next();
+  }
+
+  keydownArrowLeft(e) {
+    if (e.key === "ArrowLeft") this.prev();
+  }
+
+  next() {
+    if (
+      this.checkFinish === -1 &&
+      this.isStarted &&
+      this.commonStep < this.blocks.length - 1
+    ) {
+      this.hidePopup("show");
+      this.isShowPopup = true;
+      this.stepProgressBar += 2;
+      this.stepDescription += 1;
+
+      this.config.progressBar && this.updateProgress();
       this.updateDescription();
-      updateTextButtons();
+      this.startAnimation(this.commonStep, "next");
 
-      if (!this.isStarted) {
-        window.scroll(0, this.startPositionScroll);
-        this.startAnimation(this.commonStep, "next");
-        this.isStarted = true;
-        this.commonStep++;
-      }
-    };
+      this.commonStep++;
+    }
 
-    config.autoPlay && start();
+    this.commonStep === this.blocks.length - 1 && stop();
+    this.updateTextButtons();
+  }
 
-    this.start.addEventListener("click", start);
+  prev() {
+    if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
+      this.hidePopup("show");
+      this.isShowPopup = true;
+      this.stepProgressBar -= 2;
+      this.stepDescription -= 1;
 
-    // button stop
+      this.config.progressBar && this.updateProgress();
+      this.updateDescription();
+      this.startAnimation(this.commonStep, "prev");
 
-    const stop = () => {
-      if (this.checkFinish === -1 && this.isStarted) {
-        this.popup.style.top = this.defaultPopTop;
-        this.popup.style.left = this.defaultPopLeft;
-        this.popup.style.transitionDuration = "";
-        this.popup.style.visibility = "hidden";
-        this.isHidePopup = false;
+      this.commonStep--;
+    }
 
-        this.canvas.style.zIndex = -1;
-        this.canvas.style.display = "none";
+    this.updateTextButtons();
+  }
 
-        this.body.style.overflow = "visible";
+  start() {
+    this.canvas.style.zIndex = this.config.zIndex;
+    this.canvas.style.display = "block";
+    this.popup.style.visibility = "visible";
+    this.body.style.overflow = "hidden";
 
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (!this.isStarted) {
+      this.addEventListeners();
 
-        this.isStarted = false;
-        this.commonStep = -1;
-        this.stepProgressBar = 0;
-        this.stepDescription = 0;
+      this.config.progressBar && this.updateProgress();
+      this.updateDescription();
+      this.updateTextButtons();
 
-        window.scroll(0, 0);
-      }
-    };
+      window.scroll(0, this.startPositionScroll);
+      this.startAnimation(this.commonStep, "next");
+      this.isStarted = true;
+      this.commonStep++;
+    }
+  }
 
-    this.stop.addEventListener("click", stop);
+  stop() {
+    if (this.checkFinish === -1 && this.isStarted) {
+      this.popup.style.top = this.defaultPopTop;
+      this.popup.style.left = this.defaultPopLeft;
+      this.popup.style.transitionDuration = "";
+      this.popup.style.visibility = "hidden";
+      this.isHidePopup = false;
 
-    // button next
+      this.canvas.style.zIndex = -1;
+      this.canvas.style.display = "none";
 
-    this.next.addEventListener("click", () => {
-      if (
-        this.checkFinish === -1 &&
-        this.isStarted &&
-        this.commonStep < this.blocks.length - 1
-      ) {
-        this.stepProgressBar += 2;
-        this.stepDescription += 1;
+      this.body.style.overflow = "visible";
 
-        config.progressBar && this.updateProgress();
-        this.updateDescription();
-        this.startAnimation(this.commonStep, "next");
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.commonStep++;
-      }
+      this.isStarted = false;
+      this.commonStep = -1;
+      this.stepProgressBar = 0;
+      this.stepDescription = 0;
 
-      this.commonStep === this.blocks.length - 1 && stop();
-      updateTextButtons();
-    });
+      this.removeEventListeners();
 
-    // button prev
+      window.scroll(0, 0);
+    }
+  }
 
-    this.prev.addEventListener("click", () => {
-      if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
-        this.stepProgressBar -= 2;
-        this.stepDescription -= 1;
+  outclick() {
+    let isClickInside = this.popup.contains(event.target);
 
-        config.progressBar && this.updateProgress();
-        this.updateDescription();
-        this.startAnimation(this.commonStep, "prev");
+    if (!isClickInside && this.config.outclick) {
+      this.stop();
+    }
+  }
 
-        this.commonStep--;
-      }
-
-      updateTextButtons();
-    });
-
-    // hide popup
-
-    this.popup.addEventListener("mousemove", () => {
-      if (this.isHidePopup && this.checkFinish === -1) {
-        this.hidePopup("show");
-        this.isShowPopup = true;
-      }
-    });
-
-    this.popup.addEventListener("mouseleave", () => {
-      if (this.isHidePopup && this.isShowPopup && this.checkFinish === -1) {
-        this.hidePopup("hide");
-        this.isShowPopup = false;
-      }
-    });
-
-    // out click
-
-    document.addEventListener("click", function(event) {
-      let isClickInside = config.popup.contains(event.target);
-
-      if (!isClickInside && config.outclick) {
-        stop();
-      }
-    });
+  updateTextButtons() {
+    if (this.commonStep === this.blocks.length - 1) {
+      this.next.innerHTML = "finish";
+    } else {
+      this.next.innerHTML = this.defaultButtonNextText;
+    }
   }
 
   hidePopup(status) {
@@ -212,8 +263,62 @@ class SiteTutorial {
     }
   }
 
+  buildDefaultPopup() {
+    const controlPanel = document.createElement("div");
+    controlPanel.setAttribute("id", "site-tutorial-control-panel");
+
+    const description = document.createElement("div");
+    description.setAttribute("id", "description");
+
+    const h = document.createElement("h");
+    h.setAttribute("id", "title-site-tutorial");
+
+    const p = document.createElement("p");
+    p.setAttribute("id", "desctirption-site-tutorial");
+
+    const stop = document.createElement("span");
+    stop.setAttribute("id", "stop-site-tutorial");
+
+    const nav = document.createElement("div");
+    nav.setAttribute("id", "nav");
+
+    const progressWrap = document.createElement("div");
+    progressWrap.setAttribute("id", "progress-wrap");
+
+    const progressLine = document.createElement("div");
+    progressLine.setAttribute("id", "progress-site-tutorial");
+
+    const groupButtons = document.createElement("div");
+    groupButtons.setAttribute("id", "group-buttons");
+
+    const prev = document.createElement("button");
+    prev.setAttribute("id", "prev-site-tutorial");
+    prev.innerHTML = "back";
+
+    const next = document.createElement("button");
+    next.setAttribute("id", "next-site-tutorial");
+    next.innerHTML = "next";
+
+    controlPanel.appendChild(description);
+    controlPanel.appendChild(nav);
+    description.appendChild(h);
+    description.appendChild(p);
+    description.appendChild(stop);
+    nav.appendChild(progressWrap);
+    nav.appendChild(groupButtons);
+    progressWrap.appendChild(progressLine);
+    groupButtons.appendChild(prev);
+    groupButtons.appendChild(next);
+
+    return controlPanel;
+  }
+
   buildProgressBar() {
     this.progress = document.querySelector("#progress-site-tutorial");
+    this.progress.style.width = "100%";
+    this.progress.style.display = "flex";
+    this.progress.style.alignItems = "center";
+    this.progress.style.justifyContent = "center";
 
     const oneStep = document.createElement("div");
     oneStep.setAttribute("id", "one-step-site-tutorial");
@@ -229,8 +334,8 @@ class SiteTutorial {
       cloneLine.style.backgroundColor = this.config.progressBar.color;
 
       cloneOneStep.style.border = "solid 1px " + this.config.progressBar.color;
-      cloneOneStep.style.width = "7px";
-      cloneOneStep.style.height = "7px";
+      cloneOneStep.style.minWidth = "7px";
+      cloneOneStep.style.minHeight = "7px";
       cloneOneStep.style.borderRadius = "50%";
 
       this.progress.appendChild(cloneOneStep);
@@ -257,20 +362,63 @@ class SiteTutorial {
     this.popup.style.transitionDuration = "";
 
     const description = document.querySelector("#desctirption-site-tutorial");
-    if (
+    const title = document.querySelector("#title-site-tutorial");
+
+    const propTitle =
+      this.config.steps &&
       this.config.steps[this.stepDescription] &&
-      this.config.steps[this.stepDescription].text
-    ) {
+      this.config.steps[this.stepDescription].title;
+
+    const propText =
+      this.config.steps &&
+      this.config.steps[this.stepDescription] &&
+      this.config.steps[this.stepDescription].text;
+
+    const attrTitle =
+      this.blocks[this.stepDescription].attributes["tutorial-title"] &&
+      this.blocks[this.stepDescription].attributes["tutorial-title"].value;
+
+    const attrDescription =
+      this.blocks[this.stepDescription].attributes["tutorial-text"] &&
+      this.blocks[this.stepDescription].attributes["tutorial-text"].value;
+
+    if (propTitle) {
+      title.innerHTML = this.config.steps[this.stepDescription].title;
+    } else if (attrTitle) {
+      title.innerHTML = attrTitle;
+    } else {
+      title.innerHTML = "";
+    }
+
+    if (propText) {
       description.innerHTML = this.config.steps[this.stepDescription].text;
+    } else if (attrDescription) {
+      description.innerHTML = attrDescription;
     } else {
       description.innerHTML = "";
     }
   }
 
+  sortBlocks() {
+    const blocks = document.querySelectorAll("[site-tutorial-step]");
+    let sortBlocks = [];
+
+    for (let i = 0; i < blocks.length; i++) {
+      sortBlocks.push(blocks[i]);
+    }
+
+    return sortBlocks.sort((a, b) => {
+      return (
+        +a.attributes["site-tutorial-step"].value -
+        +b.attributes["site-tutorial-step"].value
+      );
+    });
+  }
+
   startAnimation(commonStep, stepTo) {
-    this.next.disabled = true;
-    this.prev.disabled = true;
-    this.stop.disabled = true;
+    this.buttonNext.disabled = true;
+    this.buttonPrev.disabled = true;
+    this.buttonStop.disabled = true;
 
     let div;
     let step;
@@ -331,10 +479,9 @@ class SiteTutorial {
 
       if (
         divY + nextDivHeight / 2 >
-        window.pageYOffset + window.innerHeight / 2
+          window.pageYOffset + window.innerHeight / 2 ||
+        divY !== nextDivY
       ) {
-        window.scroll(0, divY - window.innerHeight / 2 + divHeight / 2);
-      } else if (divY !== nextDivY) {
         window.scroll(0, divY - window.innerHeight / 2 + divHeight / 2);
       }
 
@@ -429,9 +576,13 @@ class SiteTutorial {
       let finishY = nextDivY + nextDivHeight + offset * 2;
 
       const topPos = nextDivY - pH - offset;
-      const bottomPos = nextDivY + nextDivHeight + offset + pH;
+      const bottomPos = nextDivY + nextDivHeight + offset + padding + pH;
       const leftPos = nextDivX - pW - offset - padding;
       const rightPos = nextDivX + nextDivWidth + pW + offset + padding;
+      const finScroll = Math.max(
+        0,
+        Math.floor(nextDivY - window.innerHeight / 2 + nextDivHeight / 2)
+      );
 
       setPositionPopup = setPositionPopup.bind(this);
 
@@ -446,29 +597,26 @@ class SiteTutorial {
       function setPositionPopup(startX, finishX, startY, finishY) {
         let centerHeightDiv = nextDivY + nextDivHeight / 2 - pH / 2;
 
-        if (
+        if (bottomPos > commonHeightDocument) {
+          finishY = nextDivY - pH - offset - padding;
+        } else if (
           topPos < nextDivY &&
-          bottomPos > windowH + nextDivY &&
+          bottomPos > windowH + finScroll &&
           rightPos < windowW
         ) {
           finishY = centerHeightDiv;
           finishX = nextDivX + nextDivWidth + offset + padding;
         } else if (
           topPos < nextDivY &&
-          bottomPos > windowH + nextDivY - pH - offset - padding &&
+          bottomPos > windowH + finScroll &&
           leftPos < 0
         ) {
           finishY = centerHeightDiv;
           finishX = nextDivX - pW - padding - leftPos;
           this.isHidePopup = true;
-        } else if (topPos < nextDivY && bottomPos > windowH + nextDivY) {
+        } else if (topPos < nextDivY && bottomPos > windowH + finScroll) {
           finishY = centerHeightDiv;
           finishX = nextDivX - pW - offset - padding;
-        } else if (
-          nextDivY + nextDivHeight + pH + offset >
-          commonHeightDocument
-        ) {
-          finishY = nextDivY - pH - offset - padding;
         }
 
         x = x + delta(startX, finishX) * framePopup;
@@ -484,12 +632,32 @@ class SiteTutorial {
       }
     };
 
-    const callback = () => {
-      this.config.steps[this.stepDescription] &&
-        this.config.steps[this.stepDescription].callback &&
-        this.config.steps[this.stepDescription].callback(nextDiv);
+    const callbackPromise = () => {
+      const callbackStep = new Promise(resolve => {
+        const call =
+          this.config.steps[this.stepDescription] &&
+          this.config.steps[this.stepDescription].callback;
 
-      this.config.callback(nextDiv, this.commonStep);
+        if (call) {
+          Promise.resolve(call(nextDiv))
+            .then(() => resolve())
+            .catch(err => console.error(err));
+        } else {
+          resolve();
+        }
+      });
+
+      const callbackCommon = new Promise(resolve => {
+        if (this.config.callback) {
+          Promise.resolve(this.config.callback(nextDiv, this.commonStep))
+            .then(() => resolve())
+            .catch(err => console.log(err));
+        } else {
+          resolve();
+        }
+      });
+
+      return Promise.all([callbackStep, callbackCommon]);
     };
 
     const firstDraw = () => {
@@ -505,18 +673,27 @@ class SiteTutorial {
       this.checkFinish = -1;
     };
 
+    const stopAnimate = () => {
+      this.buttonPrev.disabled = !(this.commonStep !== 0);
+      this.buttonStop.disabled = false;
+      this.buttonNext.disabled = false;
+
+      this.checkFinish = -1;
+    };
+
     const commonDraw = () => {
       let newDiv = updateDiv(frame);
 
       if (newDiv.finish) {
-        callback();
-
-        this.prev.disabled = !(this.commonStep !== 0);
-        this.stop.disabled = false;
-        this.next.disabled = false;
+        callbackPromise()
+          .then(() => {
+            stopAnimate();
+          })
+          .catch(() => {
+            stopAnimate();
+          });
 
         clearInterval(this.animate);
-        this.checkFinish = -1;
 
         if (this.isHidePopup) {
           this.hidePopup("hide");

@@ -1,45 +1,32 @@
-const div = document.querySelector("#control-panel");
-
-// improvements
-
-// document.querySelectorAll("[data-tutorial-step]");
-// add default popup
-// add arrow
-
-// rewrite callback and steps
-// bug with padding and offset
-// auto play
+const div = document.querySelector("#site-tutorial-control-panel");
 
 const configs = {
-  popup: div,
-  zIndex: 1000,
-  time: 1000,
-  padding: 10,
-  opacityBackground: 0.7,
-  outclick: false,
-  autoPlay: false,
+  popup: div, // default popup
+  zIndex: 1000, // 1000
+  time: 1000, // 1000
+  padding: 10, // 10
+  opacityBackground: 0.7, // 0.7
+  outclick: false, // false
+  autoStart: false, // false
   progressBar: {
-    color: "#25a76a"
+    color: "#25a76a" //false
   },
   steps: {
+    //false
     0: {
-      text: "DIV 1",
+      title: null,
+      text: null,
       callback: function(nodeElem) {
-        let text = nodeElem.innerHTML;
-        let i = 0;
-
-        const animateText = setInterval(() => {
-          i++;
-          nodeElem.innerHTML = text.substring(0, i);
-
-          if (i === text.length) {
-            clearInterval(animateText);
-          }
-        }, 40);
+        // return new Promise((resolve, reject) => {
+        //   setTimeout(() => {
+        //     alert("Text");
+        //     resolve();
+        //   }, 2000);
+        // });
       }
     }
   },
-  callback: function(nodeElem, step) {}
+  callback: function(nodeElem, step) {} // false
 };
 
 new SiteTutorial(configs);
