@@ -623,8 +623,6 @@ class SiteTutorial {
       const marginOfDiv = 10;
       const style = popup.style;
 
-      console.log(this.popup.offsetHeight);
-
       let y = popup.offsetTop;
       let x = popup.offsetLeft;
 
@@ -708,7 +706,7 @@ class SiteTutorial {
         if (this.config.callback) {
           Promise.resolve(this.config.callback(nextDiv, this.commonStep))
             .then(() => resolve())
-            .catch(err => console.log(err));
+            .catch(err => console.error(err));
         } else {
           resolve();
         }
