@@ -1,5 +1,5 @@
 class SiteTutorial {
-  constructor(config) {
+  constructor(config = {}) {
     this.config = config;
     this.blocks = this.sortBlocks();
 
@@ -35,14 +35,9 @@ class SiteTutorial {
     this.canvas.setAttribute("id", "site-tutroial");
     this.ctx = this.canvas.getContext("2d");
 
-    this.commonHeightDocument =
-      Math.max(
-        this.body.scrollHeight,
-        this.body.offsetHeight,
-        this.html.clientHeight,
-        this.html.scrollHeight,
-        this.html.offsetHeight
-      ) - this.popup.clientHeight;
+    this.commonHeightDocument = this.getCommonHeightdocument();
+
+    this.defaultzIndexes = [];
 
     this.handleNext = this.next.bind(this);
     this.handlePrev = this.prev.bind(this);
@@ -59,7 +54,7 @@ class SiteTutorial {
   initialize(config) {
     const { canvas, popup, body } = this;
 
-    canvas.width = window.innerWidth;
+    canvas.width = window.innerWidth + 1;
     canvas.height = this.commonHeightDocument;
     canvas.style.position = "absolute";
     canvas.style.zIndex = config.zIndex ? config.zIndex : 1000;
@@ -72,14 +67,8 @@ class SiteTutorial {
     popup.style.position = "absolute";
     popup.style.visibility = "hidden";
 
-    this.defaultPopTop =
-      this.blocks[0].offsetTop +
-      this.blocks[0].offsetHeight +
-      this.offset * 2 +
-      "px";
     this.defaultPopLeft = -this.popup.offsetWidth + "px";
 
-    popup.style.top = this.defaultPopTop;
     popup.style.left = this.defaultPopLeft;
     popup.style.zIndex = this.canvas.style.zIndex + 1;
 
@@ -95,6 +84,8 @@ class SiteTutorial {
       this.stepProgressBar = 0;
       this.buildProgressBar();
     }
+
+    this.getzIndex();
 
     // button start
     this.config.autoStart && this.start().bind(this);
@@ -246,6 +237,17 @@ class SiteTutorial {
     }
   }
 
+  getCommonHeightdocument() {
+    return Math.max(
+      this.body.scrollHeight,
+      this.body.offsetHeight,
+      this.body.clientHeight,
+      this.html.clientHeight,
+      this.html.scrollHeight,
+      this.html.offsetHeight
+    );
+  }
+
   updateTextButtons() {
     if (this.commonStep === this.blocks.length - 1) {
       this.next.innerHTML = "finish";
@@ -288,6 +290,9 @@ class SiteTutorial {
     const progressLine = document.createElement("div");
     progressLine.setAttribute("id", "progress-site-tutorial");
 
+    const progressCounter = document.createElement("p");
+    progressCounter.setAttribute("id", "progress-counter-site-tutorial");
+
     const groupButtons = document.createElement("div");
     groupButtons.setAttribute("id", "group-buttons");
 
@@ -306,9 +311,13 @@ class SiteTutorial {
     description.appendChild(stop);
     nav.appendChild(progressWrap);
     nav.appendChild(groupButtons);
-    progressWrap.appendChild(progressLine);
     groupButtons.appendChild(prev);
     groupButtons.appendChild(next);
+
+    if (this.config.progressBar) progressWrap.appendChild(progressLine);
+
+    if (this.config.progressBar.counter)
+      progressWrap.appendChild(progressCounter);
 
     return controlPanel;
   }
@@ -342,6 +351,14 @@ class SiteTutorial {
 
       if (i !== this.blocks.length - 1) this.progress.appendChild(cloneLine);
     }
+
+    if (this.config.progressBar.counter) {
+      this.progressCounter = document.getElementById(
+        "progress-counter-site-tutorial"
+      );
+
+      this.progressCounter.innerHTML = "1/" + (this.blocks.length + 1);
+    }
   }
 
   updateProgress() {
@@ -354,6 +371,10 @@ class SiteTutorial {
         const stepPoint = this.progress.childNodes[index];
         stepPoint.style.backgroundColor = this.config.progressBar.color;
       }
+
+      if (this.progressCounter)
+        this.progressCounter.innerHTML =
+          this.stepDescription + 1 + "/" + this.blocks.length;
     });
   }
 
@@ -415,16 +436,45 @@ class SiteTutorial {
     });
   }
 
+  getCoords(elem) {
+    var clientRect = elem.getBoundingClientRect();
+
+    return {
+      top: Math.round(clientRect.top + scrollY),
+      left: Math.round(clientRect.left + scrollX)
+    };
+  }
+
+  getzIndex() {
+    this.blocks.forEach(elem => {
+      this.defaultzIndexes.push(elem.style.zIndex);
+    });
+  }
+
+  setDefaultzIndex() {
+    this.defaultzIndexes.forEach((elem, index) => {
+      this.blocks[index].style.zIndex = elem;
+    });
+  }
+
   startAnimation(commonStep, stepTo) {
     this.buttonNext.disabled = true;
     this.buttonPrev.disabled = true;
     this.buttonStop.disabled = true;
+
+    this.setDefaultzIndex();
 
     let div;
     let step;
 
     if (commonStep === -1) {
       div = this.blocks[0];
+
+      this.popup.style.top =
+        this.blocks[0].offsetTop +
+        this.blocks[0].offsetHeight +
+        this.offset * 2 +
+        "px";
     } else {
       div = this.blocks[commonStep];
     }
@@ -435,17 +485,21 @@ class SiteTutorial {
       step = -1;
     }
 
+    const coordsDiv = this.getCoords(div);
+
     let divWidth = div.offsetWidth;
     let divHeight = div.offsetHeight;
-    let divY = div.offsetTop;
-    let divX = div.offsetLeft;
+    let divY = coordsDiv.top;
+    let divX = coordsDiv.left;
 
     let nextDiv = this.blocks[commonStep + step];
 
+    const coordsNextDiv = this.getCoords(nextDiv);
+
     let nextDivWidth = nextDiv.offsetWidth;
     let nextDivHeight = nextDiv.offsetHeight;
-    let nextDivY = nextDiv.offsetTop;
-    let nextDivX = nextDiv.offsetLeft;
+    let nextDivY = coordsNextDiv.top;
+    let nextDivX = coordsNextDiv.left;
 
     this.checkFinish = 0;
 
@@ -505,6 +559,7 @@ class SiteTutorial {
     };
 
     const draw = div => {
+      this.canvas.height = this.getCommonHeightdocument();
       const { ctx, canvas, padding, config } = this;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -557,7 +612,7 @@ class SiteTutorial {
     };
 
     const animatePopup = () => {
-      const { popup, padding, commonHeightDocument, offset } = this;
+      const { popup, padding, offset } = this;
 
       framePopup++;
 
@@ -567,6 +622,8 @@ class SiteTutorial {
       const windowH = window.innerHeight;
       const marginOfDiv = 10;
       const style = popup.style;
+
+      console.log(this.popup.offsetHeight);
 
       let y = popup.offsetTop;
       let x = popup.offsetLeft;
@@ -597,7 +654,7 @@ class SiteTutorial {
       function setPositionPopup(startX, finishX, startY, finishY) {
         let centerHeightDiv = nextDivY + nextDivHeight / 2 - pH / 2;
 
-        if (bottomPos > commonHeightDocument) {
+        if (bottomPos > this.getCommonHeightdocument()) {
           finishY = nextDivY - pH - offset - padding;
         } else if (
           topPos < nextDivY &&

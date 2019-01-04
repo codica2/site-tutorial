@@ -2,8 +2,8 @@
   justify-content: space-around;
   align-items: center;
   width: 450px;
-  height: 140px;
-  border-radius: 10px;
+  min-height: 140px;
+  border-radius: 2px;
   background-color: #fff;
   font-family: Raleway, sans-serif;
   box-shadow: 0 0 15px 0 rgba(56, 56, 56, 0.288);
@@ -12,7 +12,8 @@
 #site-tutorial-control-panel #description {
   padding: 10px;
   box-sizing: border-box;
-  height: 65%
+  background-color: #fff;
+  min-height: 65%
 }
 
 #site-tutorial-control-panel #description p{
@@ -23,8 +24,8 @@
   display: flex;
   align-items: center;
   background-color: #f9f9f9;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 15px;
+  border-bottom-left-radius:  2px;
+  border-bottom-right-radius:  5px;
   height: 35%;
 }
 
@@ -56,22 +57,27 @@
 }
 
 #site-tutorial-control-panel #next-site-tutorial {
-  background-color: #45b681;
+  background-color: #FF3A41;
   color: #fff;
-  border-bottom-right-radius: 10px;
+  border-bottom-right-radius:  2px;
 }
 
 #site-tutorial-control-panel #next-site-tutorial:hover {
-  background-color: #25a76a;
+  background-color: rgb(255, 102, 107);
 }
 
 #site-tutorial-control-panel #next-site-tutorial:active {
-  background-color: #309968;
+  background-color: #FF3A41;
 }
 
 #site-tutorial-control-panel #next-site-tutorial:disabled,
 #site-tutorial-control-panel #next-site-tutorial[disabled]{
-  background-color: #84ac99;
+  background-color: rgb(175, 99, 101);
+}
+
+#progress-counter-site-tutorial {
+  margin: 0;
+  margin-left: 18px;
 }
 
 #stop-site-tutorial{
@@ -89,7 +95,7 @@
   content: " ";
   height: 20px;
   width: 2px;
-  background-color: #25a76a;
+  background-color: #FF3A41;
 }
 
 #stop-site-tutorial:before {
@@ -101,5 +107,9 @@
 }
 
 #stop-site-tutorial:hover:after, #stop-site-tutorial:hover:before{
-  background-color: #173f2c;
+  background-color: rgb(71, 20, 21);
+}
+
+#title-site-tutorial {
+  font-weight: 600;
 }
