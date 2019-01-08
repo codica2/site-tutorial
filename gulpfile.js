@@ -12,7 +12,7 @@ gulp.task("build", function() {
       })
     )
     .pipe(minify())
-    .pipe(gulp.dest("dist"));
+    .pipe(gulp.dest("site-tutorial"));
 });
 
 gulp.task("start", function() {

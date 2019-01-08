@@ -3,8 +3,15 @@
 Is easy, animated, a lot of functionality, flexible, step tutorial for your site.
 
 <p align="center"> 
- <img width="100%" src="gifs/gautocomplete.gif" >
+ <img width="800px" src="images/gif-readme.gif" >
 </p>
+
+You can test plugin. Clone project and start the next commands:
+
+```
+npm install
+gulp start
+```
 
 ## Getting started
 
@@ -21,7 +28,6 @@ Site-Tutorial is very simple to use.
 2. Also you can add `tutorial-title="title"` and `tutorial-text="text"` attributes for title and text respectively;
 3. Create button for start tutorial and set `id="start-site-tutorial"`;
 4. Create js file and create object and pass options to argument `new SiteTutorial(options)`;
-5. Enjoy.
 
 <h3>HTML</h3>
 
@@ -38,234 +44,127 @@ var options = { time: 1500 };
 new SiteTutorial(options);
 ```
 
-## Data types
+## Popup
 
-HV-Autocomplete get two data types: **default**, **for categories**.
+You can create custom popup or use default popup. For add custom popup just pass parameter to options `popup: DOM element`. Default popup stay like default parameter, but for use it you need to connect styles. Link to styles - [download](https://www.google.com  "Default popup styles").
 
-<h4>Default</h4>
+```js 
+var options = { popup: document.getElementById("DOM-Element") };
 
-```json
-[
-  {"name": "Alex", "url": "http://..."},
-  {"name": "Page", "url": "http://..."},
-  ...
-]
+new SiteTutorial(options);
 ```
 
-<h4>For categories</h4>
+<h3>Custom popup setting</h3>
 
-```json
-{
-  "category1": {
-    "title": "Category 1",
-    "data": [
-      {
-        "name": "Page Warner",
-        "url": "http://..."
-      },
-      ... ]
-  },
-  "category2": {
-    "title": "Category 2",
-    "data": [
-      {
-        "name": "Golden Curtis",
-        "url": "http://..."
-      },
-      ... ]
-  },
-  ...
-}
+| id                            | Description                                                            |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| `site-tutorial-control-panel` | Main block. Add this id for block which will follow to highlight area. |
+| `stop-site-tutorial`          | This stops tutorial and scroll page to top.                            |
+| `next-site-tutorial`          | It switchs to next step.                                               |
+| `prev-site-tutorial`          | It switchs to previous step.                                           |
+
+## Progress bar
+
+You can connect progress bar, add `progressBar` property to oprions and pass the next parameters.
+
+```js 
+var options = {  
+  progressBar: {
+    color: "#FF3A41",
+    counter: true
+  } 
+};
+
+new SiteTutorial(options);
 ```
 
-## Acync get data
+| Parameters | Default value | Type        | Description                |
+| ---------- | ------------- | ----------- | -------------------------- |
+| `color`    | `#000`        | **string**  | Set color for progress bar |
+| `counter`  | `false`       | **boolean** | Add step counter           |
 
-If you want to load your asynchronous data you can pass function to option `data`. Function must return object of shape. See example below.
 
-```javascript
+<h3>! Important</h3>
+
+> For use progress bar in custom popup you need to add block with `id="progress-site-tutorial"` and add that block to `div` with required `width`.
+
+
+## Steps
+
+Steps is a main part tutorial. You can control every step through `steps` option. Every step has `title`, `text`, `callback`, parameters and steps begin from `0`.
+
+> `title`, `text`, properties has higher priority, then value in attributes.
+
+```js
 var options = {
-  input: document.querySelector("#main"),
-  asyncData: function(input) {
-    return {
-      method: "GET",
-      url: "/search/data.json?query=" + input.value,
-      success: function(response) {
-        console.log(response);
+  steps: {
+    0: {
+      title: "Title",
+      text: "Text",
+      callback: function(nodeElem) {
+        alert("innerHTML: " + nodeElem.innerHTML);
       }
-    };
+    },
+    1: {
+      callback: function(nodeElem) {
+        nodeElem.style.backgroundColor = "#fff";
+      }
+    }
   }
-};
-
-new HVAutocomplete(options);
-```
-
-
-## Categories
-
-With HV-Autocomplete you can separate your data to categories. For this use `categories: true` option.
-
-<h4>Example</h4>
-
-<p align="center"> 
- <img width="100%" src="gifs/gautocomplete3.gif" >
-</p>
-
-<h4>Code</h4>
-
-```javascript
-var options = {
-  input: document.querySelector("#input"),
-  data: data
-};
-
-new HVAutocomplete(options);
-```
-
-<h4>Data type</h4>
-
-```json
-{
-  "category1": {
-    "title": "Category 1",
-    "data": [
-      {
-        "name": "Page Warner",
-        "url": "http://..."
-      },
-      ... ]
-  },
-  "category2": {
-    "title": "Category 2",
-    "data": [
-      {
-        "name": "Golden Curtis",
-        "url": "http://..."
-      },
-      ... ]
-  },
-  ...
 }
+
+new SiteTutorial(options);
 ```
 
-## Horizontal categories
+| Parameters | Default value | Type         | Description                                                          |
+| ---------- | ------------- | ------------ | -------------------------------------------------------------------- |
+| `title`    | `""`          | **string**   | Set title on step                                                    |
+| `text`     | `""`          | **string**   | Set text on step                                                     |
+| `callback` | `null`        | **function** | Call function after end animation. Function has current DOM Element. |
 
-We want that user can use HV-Autocomplete in horizontal orientation. For this simple use right data type - see above.
+## Async callback
 
-<p align="center"> 
- <img width="100%" src="gifs/gautocomplete.gif" >
-</p>
+Every step has one common callback and current step callback (see above). Async callback will allow to await result and in process execution all button will be block, that willn't allow to do next, or previous step or stop tutorial. For that return Promise. See how to this use below.
 
-<h4>Code</h4>
 
-```javascript
+```js
 var options = {
-  input: document.querySelector("#input"),
-  data: data,
-  horizontal: true
-};
-
-new HVAutocomplete(options);
-```
-
-## Search
-
-HV-Autocomplete has two search methods for your convenience:
-- Default search
-- Global search - looking all matches after space. For this search use `globalSearch: true`
-
-<h4>Example</h4>
-
-<p align="center"> 
- <img width="100%" src="gifs/gautocomplete4.gif" >
-</p>
-
-<h4>Code</h4>
-
-```javascript
-var options = {
-  input: document.querySelector("#input"),
-  data: data,
-  globalSearch: true
-};
-
-new HVAutocomplete(options);
-```
-
-## Styling
-
-We took care that styling will easy, so include two options for this:
-
-- `resultClass`
-- `resultStyles`
-
-<h4>resultClass</h4>
-
-It option replase default class to your class result block and child nodes.
-
-For example:
-
-```
-div.hv-result => div.your-class-result
-  └── p.hv-element-no-category => div.your-class-element-no-category
-```
-
-<h4>resultStyles</h4>
-
-It options set inline styles for result block.
-
-## Structure child nodes result block
-
-<h4>Default structure</h4>
-
-```
-div.hv-result
-  └── a.hv-element-no-category          => option
-```
-
-<h4>Structure with category</h4>
-
-```
-div.hv-result
-  └── div.hv-block-category             => block if has category
-        ├── h3.hv-title-category        => title category
-        └── a.hv-element-with-category  => option
-```
-
-## Event `onOptionClick`
-
-This event is calling when click on option and return `event`, `name`, `url`, `nameCategory` parameters.
-
-<h4>Example</h4>
-
-```javascript
-var options = {
-  input: document.querySelector("#input"),
-  data: data,
-  onOptionClick: function(event, name, url, nameCategory){
-    console.log(name);
+  callback: function(nodeElem) {      
+    return new Promise((resolve, reject) => {
+      var timeOut = setInterval(() => {
+        alert("Time is stop!")
+        resolve();
+      }, 1000);
+    });
   }
-};
+}
 
-new HVAutocomplete(options);
+new SiteTutorial(options);
 ```
+
+## Control
+
+There is a possibility control tutorial with keyboard. Keys - `←` - step back, and `→` - step forward.
 
 ## API
 
-| Options         | Default value | Type             | Description                                  |
-| --------------- | ------------- | ---------------- | -------------------------------------------- |
-| `data`          | `none`        | **object**       | See above. `Required field`                  |
-| `input`         | `none`        | **HTML element** | Set HTML element. `Required field`           |
-| `maxLength`     | `5`           | **number**       | Set maximum search result.                   |
-| `horizontal`    | `false`       | **boolean**      | Set your autocomplete horizontal  See above. |
-| `globalSearch`  | `false`       | **boolean**      | Set type search. See above.                  |
-| `resultClass`   | `hv-result`   | **string**       | Set class for result. See above.             |
-| `resultStyles`  | `null`        | **object**       | Set inline styles for result. See above.     |
-| `onOptionClick` | `null`        | **function**     | Callback after click on option               |
+| Options       | Default value   | Type            | Description                                             |
+| ------------- | --------------- | --------------- | ------------------------------------------------------- |
+| `popup`       | `default popup` | **DOM Element** | See above.                                              |
+| `time`        | `1000`          | **number**      | Time execution animation.                               |
+| `opacity`     | `0.7`           | **number**      | Background opacity.                                     |
+| `zIndex`      | `1000`          | **number**      | Set z-index for tutorial.                               |
+| `padding`     | `10`            | **number**      | Set offset for highlighted area. **Max value - 15**     |
+| `outclick`    | `false`         | **boolean**     | Add posibility close tutorial after outclick popup.     |
+| `autoStart`   | `false`         | **boolean**     | Add posibility start tutorial after loading page.       |
+| `progressBar` | `null`          | **object**      | Add progress bar to popup.                              |
+| `steps`       | `null`          | **object**      | With this option you can control every step. See above. |
+| `callback`    | `null`          | **function**    | Call function after stop animation.                     |
 
 
 ## License
 
-hv-autocomplete is Copyright © 2015-2018 Codica. It is released under the [MIT License](https://opensource.org/licenses/MIT).
+site-tutorial is Copyright © 2015-2018 Codica. It is released under the [MIT License](https://opensource.org/licenses/MIT).
 
 ## About Codica
 

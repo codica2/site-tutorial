@@ -1,19 +1,11 @@
 document.onreadystatechange = function() {
   if (document.readyState == "interactive") {
     const configs = {
-      popup: null, // default popup
-      zIndex: 1000, // 1000
-      time: 1000, // 1000
-      padding: 10, // 10
-      opacityBackground: 0.7, // 0.7
-      outclick: false, // false
-      autoStart: false, // false
       progressBar: {
-        color: "#FF3A41", //false
+        color: "#FF3A41",
         counter: true
       },
       steps: {
-        // false
         0: {
           title: null,
           text: null,
@@ -50,10 +42,9 @@ document.onreadystatechange = function() {
           }
         }
       },
-      callback: function(nodeElem, step) {} // false
+      callback: function(nodeElem, step) {}
     };
 
-    console.log(true);
     new SiteTutorial(configs);
   }
 };
