@@ -5,10 +5,10 @@ var gulp = require("gulp"),
 
 gulp.task("build", function() {
   return gulp
-    .src("js/site-tutorial.js")
+    .src("develop/site-tutorial.js")
     .pipe(
       babel({
-        presets: ["es2015"]
+        presets: ["@babel/env"]
       })
     )
     .pipe(minify())
