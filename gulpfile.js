@@ -5,7 +5,7 @@ var gulp = require("gulp"),
 
 gulp.task("build", function() {
   return gulp
-    .src("src/site-tutorial.js")
+    .src("src/js/site-tutorial.js")
     .pipe(
       babel({
         presets: ["@babel/preset-env"]

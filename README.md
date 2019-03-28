@@ -3,7 +3,7 @@
 Is easy, animated, a lot of functionality, flexible, step tutorial for your site.
 
 <p align="center">
- <img width="800px" src="images/gif-readme.gif" >
+ <img width="800px" src="readme.gif" >
 </p>
 
 You can test plugin. Clone project and start the next commands:
