@@ -10,6 +10,44 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+var _addEventListeners = Symbol("addEventListeners");
+
+var _removeEventListeners = Symbol("removeEventListeners");
+
+var _mouseLeavePopup = Symbol("mouseLeavePopup");
+
+var _mouseMovePopup = Symbol("mouseMovePopup");
+
+var _keydownArrowRight = Symbol("keydownArrowRight");
+
+var _keydownArrowLeft = Symbol("keydownArrowLeft");
+
+var _outclick = Symbol("outclick");
+
+var _getCommonHeightdocument = Symbol("getCommonHeightdocument");
+
+var _updateTextButtons = Symbol("updateTextButtons");
+
+var _hidePopup = Symbol("hidePopup");
+
+var _buildDefaultPopup = Symbol("buildDefaultPopup");
+
+var _buildProgressBar = Symbol("buildProgressBar");
+
+var _updateProgress = Symbol("updateProgress");
+
+var _updateDescription = Symbol("updateDescription");
+
+var _sortBlocks = Symbol("sortBlocks");
+
+var _getCoords = Symbol("getCoords");
+
+var _getzIndex = Symbol("getzIndex");
+
+var _setDefaultzIndex = Symbol("setDefaultzIndex");
+
+var _startAnimation = Symbol("startAnimation");
+
 var SiteTutorial =
 /*#__PURE__*/
 function () {
@@ -18,52 +56,50 @@ function () {
 
     _classCallCheck(this, SiteTutorial);
 
-    if (document.readyState == "interactive") {
-      var defaultConfig = {
-        time: 1000,
-        opacity: 0.7,
-        zIndex: 1000,
-        padding: 10,
-        outclick: false,
-        autoStart: false,
-        progressBar: null,
-        steps: null,
-        callback: null
-      };
-      this.config = _objectSpread({}, defaultConfig, config);
-      this.blocks = this.sortBlocks();
-      this.body = document.body;
-      this.html = document.documentElement;
-      this.padding = this.config.padding > 15 ? 10 : Math.max(0, this.config.padding);
-      this.offset = 10;
-      this.time = this.config.time;
-      this.frame_rate = 0.06; // 60 FPS
-
-      this.animate;
-      this.commonStep = -1;
-      this.checkFinish = -1;
-      this.isStarted = false;
-      this.isHidePopup = false;
-      this._isShowPopup = false;
-      this.startPositionScroll = this.blocks[0].offsetTop - window.innerHeight / 2;
-      if (!config.popup) this.body.appendChild(this.buildDefaultPopup());
-      this.popup = document.querySelector("#site-tutorial-control-panel");
-      this.canvas = document.createElement("canvas");
-      this.canvas.setAttribute("id", "site-tutroial");
-      this.ctx = this.canvas.getContext("2d");
-      this.commonHeightDocument = this.getCommonHeightdocument();
-      this.defaultzIndexes = [];
-      this.next = this.next.bind(this);
-      this.prev = this.prev.bind(this);
-      this.keydownArrowRight = this.keydownArrowRight.bind(this);
-      this.keydownArrowLeft = this.keydownArrowLeft.bind(this);
-      this.mouseMovePopup = this.mouseMovePopup.bind(this);
-      this.mouseLeavePopup = this.mouseLeavePopup.bind(this);
-      this.outclick = this.outclick.bind(this);
-      this.handleStop = this.stop.bind(this);
-      this.start = this.start.bind(this);
-      this.initialize();
-    }
+    var defaultConfig = {
+      time: 1000,
+      opacity: 0.7,
+      zIndex: 1000,
+      padding: 10,
+      outclick: false,
+      autoStart: false,
+      progressBar: null,
+      steps: null,
+      callback: null
+    };
+    this.body = document.body;
+    this.html = document.documentElement;
+    this.config = _objectSpread({}, defaultConfig, config);
+    this.blocks = this[_sortBlocks]();
+    this.padding = this.config.padding;
+    this.offset = 10;
+    this.time = this.config.time;
+    this.frame_rate = 0.06;
+    this.animate;
+    this.commonStep = -1;
+    this.checkFinish = -1;
+    this.isStarted = false;
+    this.isHidePopup = false;
+    this._isShowPopup = false;
+    this.startPositionScroll = this.blocks[0].offsetTop - window.innerHeight / 2;
+    if (!config.popup) this.body.appendChild(this[_buildDefaultPopup]());
+    this.popup = document.querySelector("#site-tutorial-control-panel");
+    this.canvas = document.createElement("canvas");
+    this.canvas.setAttribute("id", "site-tutroial");
+    this.ctx = this.canvas.getContext("2d");
+    this.commonHeightDocument = this[_getCommonHeightdocument]();
+    this.next = this.next.bind(this);
+    this.prev = this.prev.bind(this);
+    this.stop = this.stop.bind(this);
+    this.start = this.start.bind(this);
+    this[_keydownArrowRight] = this[_keydownArrowRight].bind(this);
+    this[_keydownArrowLeft] = this[_keydownArrowLeft].bind(this);
+    this[_mouseMovePopup] = this[_mouseMovePopup].bind(this);
+    this[_mouseLeavePopup] = this[_mouseLeavePopup].bind(this);
+    this[_outclick] = this[_outclick].bind(this);
+    this.popup.style.position = "absolute";
+    this.popup.style.visibility = "hidden";
+    this.config.autoStart && this.initialize();
   }
 
   _createClass(SiteTutorial, [{
@@ -81,110 +117,118 @@ function () {
       canvas.style.left = "0px";
       canvas.style.display = "none";
       body.appendChild(canvas);
-      popup.style.position = "absolute";
-      popup.style.visibility = "hidden";
       this.defaultPopLeft = -this.popup.offsetWidth + "px";
       popup.style.left = this.defaultPopLeft;
       popup.style.zIndex = this.canvas.style.zIndex + 1;
       this.buttonPrev = document.querySelector("#prev-site-tutorial");
-      this.buttonStart = document.querySelector("#start-site-tutorial");
       this.buttonNext = document.querySelector("#next-site-tutorial");
       this.buttonStop = document.querySelector("#stop-site-tutorial");
-      this.defaultButtonNextText = this.next.innerHTML;
+      this.defaultButtonNextText = this.buttonNext.innerHTML;
       this.stepDescription = 0;
 
       if (config.progressBar) {
         this.stepProgressBar = 0;
-        this.buildProgressBar();
+
+        this[_buildProgressBar]();
       }
 
-      this.getzIndex(); // button start
+      this[_getzIndex]();
 
-      this.config.autoStart && this.start();
-      this.buttonStart.addEventListener("click", this.start);
+      this.start();
     }
   }, {
-    key: "addEventListeners",
-    value: function addEventListeners() {
+    key: _addEventListeners,
+    value: function value() {
       this.buttonNext.addEventListener("click", this.next);
-      document.addEventListener("keydown", this.keydownArrowRight);
+      document.addEventListener("keydown", this[_keydownArrowRight]);
       this.buttonPrev.addEventListener("click", this.prev);
-      this.body.addEventListener("keydown", this.keydownArrowLeft);
-      this.popup.addEventListener("mousemove", this.mouseMovePopup);
-      this.popup.addEventListener("mouseleave", this.mouseLeavePopup);
-      this.buttonStop.addEventListener("click", this.handleStop);
-      document.addEventListener("click", this.outclick);
+      this.body.addEventListener("keydown", this[_keydownArrowLeft]);
+      this.popup.addEventListener("mousemove", this[_mouseMovePopup]);
+      this.popup.addEventListener("mouseleave", this[_mouseLeavePopup]);
+      this.buttonStop.addEventListener("click", this.stop);
+      document.addEventListener("click", this[_outclick]);
     }
   }, {
-    key: "removeEventListeners",
-    value: function removeEventListeners() {
+    key: _removeEventListeners,
+    value: function value() {
       this.buttonNext.removeEventListener("click", this.next);
-      document.removeEventListener("keydown", this.keydownArrowRight);
+      document.removeEventListener("keydown", this[_keydownArrowRight]);
       this.buttonPrev.removeEventListener("click", this.prev);
-      this.body.removeEventListener("keydown", this.keydownArrowLeft);
-      this.popup.removeEventListener("mousemove", this.mouseMovePopup);
-      this.popup.removeEventListener("mouseleave", this.mouseLeavePopup);
-      this.buttonStop.removeEventListener("click", this.handleStop);
-      document.removeEventListener("click", this.outclick);
+      this.body.removeEventListener("keydown", this[_keydownArrowLeft]);
+      this.popup.removeEventListener("mousemove", this[_mouseMovePopup]);
+      this.popup.removeEventListener("mouseleave", this[_mouseLeavePopup]);
+      this.buttonStop.removeEventListener("click", this.stop);
+      document.removeEventListener("click", this[_outclick]);
     }
   }, {
-    key: "mouseLeavePopup",
-    value: function mouseLeavePopup() {
+    key: _mouseLeavePopup,
+    value: function value() {
       if (this.isHidePopup && this._isShowPopup && this.checkFinish === -1) {
-        this.hidePopup("hide");
+        this[_hidePopup]("hide");
+
         this.isShowPopup = false;
       }
     }
   }, {
-    key: "mouseMovePopup",
-    value: function mouseMovePopup() {
+    key: _mouseMovePopup,
+    value: function value() {
       if (this.isHidePopup && this.checkFinish === -1) {
-        this.hidePopup("show");
+        this[_hidePopup]("show");
+
         this.isShowPopup = true;
       }
     }
   }, {
-    key: "keydownArrowRight",
-    value: function keydownArrowRight(e) {
+    key: _keydownArrowRight,
+    value: function value(e) {
       if (e.key === "ArrowRight") this.next();
     }
   }, {
-    key: "keydownArrowLeft",
-    value: function keydownArrowLeft(e) {
+    key: _keydownArrowLeft,
+    value: function value(e) {
       if (e.key === "ArrowLeft") this.prev();
     }
   }, {
     key: "next",
     value: function next() {
       if (this.checkFinish === -1 && this.isStarted && this.commonStep < this.blocks.length - 1) {
-        this.hidePopup("show");
+        this[_hidePopup]("show");
+
         this.isShowPopup = true;
         this.stepProgressBar += 2;
         this.stepDescription += 1;
-        this.config.progressBar && this.updateProgress();
-        this.updateDescription();
-        this.startAnimation(this.commonStep, "next");
+        this.config.progressBar && this[_updateProgress]();
+
+        this[_updateDescription]();
+
+        this[_startAnimation](this.commonStep, "next");
+
         this.commonStep++;
       }
 
-      this.commonStep === this.blocks.length - 1 && stop();
-      this.updateTextButtons();
+      this.commonStep === this.blocks.length - 1 && this.stop();
+
+      this[_updateTextButtons]();
     }
   }, {
     key: "prev",
     value: function prev() {
       if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
-        this.hidePopup("show");
+        this[_hidePopup]("show");
+
         this.isShowPopup = true;
         this.stepProgressBar -= 2;
         this.stepDescription -= 1;
-        this.config.progressBar && this.updateProgress();
-        this.updateDescription();
-        this.startAnimation(this.commonStep, "prev");
+        this.config.progressBar && this[_updateProgress]();
+
+        this[_updateDescription]();
+
+        this[_startAnimation](this.commonStep, "prev");
+
         this.commonStep--;
       }
 
-      this.updateTextButtons();
+      this[_updateTextButtons]();
     }
   }, {
     key: "start",
@@ -195,12 +239,18 @@ function () {
       this.body.style.overflow = "hidden";
 
       if (!this.isStarted) {
-        this.addEventListeners();
-        this.config.progressBar && this.updateProgress();
-        this.updateDescription();
-        this.updateTextButtons();
+        this[_addEventListeners]();
+
+        this.config.progressBar && this[_updateProgress]();
+
+        this[_updateDescription]();
+
+        this[_updateTextButtons]();
+
         window.scroll(0, this.startPositionScroll);
-        this.startAnimation(this.commonStep, "next");
+
+        this[_startAnimation](this.commonStep, "next");
+
         this.isStarted = true;
         this.commonStep++;
       }
@@ -222,13 +272,15 @@ function () {
         this.commonStep = -1;
         this.stepProgressBar = 0;
         this.stepDescription = 0;
-        this.removeEventListeners();
+
+        this[_removeEventListeners]();
+
         window.scroll(0, 0);
       }
     }
   }, {
-    key: "outclick",
-    value: function outclick() {
+    key: _outclick,
+    value: function value(event) {
       var isClickInside = this.popup.contains(event.target);
 
       if (!isClickInside && this.config.outclick) {
@@ -236,22 +288,22 @@ function () {
       }
     }
   }, {
-    key: "getCommonHeightdocument",
-    value: function getCommonHeightdocument() {
+    key: _getCommonHeightdocument,
+    value: function value() {
       return Math.max(this.body.scrollHeight, this.body.offsetHeight, this.body.clientHeight, this.html.clientHeight, this.html.offsetHeight);
     }
   }, {
-    key: "updateTextButtons",
-    value: function updateTextButtons() {
+    key: _updateTextButtons,
+    value: function value() {
       if (this.commonStep === this.blocks.length - 1) {
-        this.next.innerHTML = "finish";
+        this.buttonNext.innerHTML = "finish";
       } else {
-        this.next.innerHTML = this.defaultButtonNextText;
+        this.buttonNext.innerHTML = this.defaultButtonNextText;
       }
     }
   }, {
-    key: "hidePopup",
-    value: function hidePopup(status) {
+    key: _hidePopup,
+    value: function value(status) {
       if (status === "hide") {
         this.popup.style.transitionDuration = "200ms";
         this.popup.style.opacity = 0.2;
@@ -260,8 +312,8 @@ function () {
       }
     }
   }, {
-    key: "buildDefaultPopup",
-    value: function buildDefaultPopup() {
+    key: _buildDefaultPopup,
+    value: function value() {
       var controlPanel = document.createElement("div");
       controlPanel.setAttribute("id", "site-tutorial-control-panel");
       var description = document.createElement("div");
@@ -300,7 +352,7 @@ function () {
         progressWrap.appendChild(progressLine);
       }
 
-      if (this.config.progressBar.counter) {
+      if (this.config.progressBar && this.config.progressBar.counter) {
         var progressCounter = document.createElement("p");
         progressCounter.setAttribute("id", "progress-counter-site-tutorial");
         progressWrap.appendChild(progressCounter);
@@ -309,8 +361,8 @@ function () {
       return controlPanel;
     }
   }, {
-    key: "buildProgressBar",
-    value: function buildProgressBar() {
+    key: _buildProgressBar,
+    value: function value() {
       this.progress = document.querySelector("#progress-site-tutorial");
       this.progress.style.width = "100%";
       this.progress.style.display = "flex";
@@ -341,8 +393,8 @@ function () {
       }
     }
   }, {
-    key: "updateProgress",
-    value: function updateProgress() {
+    key: _updateProgress,
+    value: function value() {
       var _this = this;
 
       this.progress.childNodes.forEach(function (elem, index) {
@@ -361,8 +413,8 @@ function () {
       });
     }
   }, {
-    key: "updateDescription",
-    value: function updateDescription() {
+    key: _updateDescription,
+    value: function value() {
       this.isHidePopup = false;
       this.popup.style.transitionDuration = "";
       var description = document.querySelector("#desctirption-site-tutorial");
@@ -389,8 +441,8 @@ function () {
       }
     }
   }, {
-    key: "sortBlocks",
-    value: function sortBlocks() {
+    key: _sortBlocks,
+    value: function value() {
       var blocks = document.querySelectorAll("[site-tutorial-step]");
       var sortBlocks = [];
 
@@ -403,26 +455,27 @@ function () {
       });
     }
   }, {
-    key: "getCoords",
-    value: function getCoords(elem) {
+    key: _getCoords,
+    value: function value(elem) {
       var clientRect = elem.getBoundingClientRect();
       return {
-        top: Math.round(clientRect.top + scrollY),
-        left: Math.round(clientRect.left + scrollX)
+        top: Math.round(clientRect.top + window.scrollY),
+        left: Math.round(clientRect.left + window.scrollX)
       };
     }
   }, {
-    key: "getzIndex",
-    value: function getzIndex() {
+    key: _getzIndex,
+    value: function value() {
       var _this2 = this;
 
+      this.defaultzIndexes = [];
       this.blocks.forEach(function (elem) {
         _this2.defaultzIndexes.push(elem.style.zIndex);
       });
     }
   }, {
-    key: "setDefaultzIndex",
-    value: function setDefaultzIndex() {
+    key: _setDefaultzIndex,
+    value: function value() {
       var _this3 = this;
 
       this.defaultzIndexes.forEach(function (elem, index) {
@@ -430,14 +483,16 @@ function () {
       });
     }
   }, {
-    key: "startAnimation",
-    value: function startAnimation(commonStep, stepTo) {
+    key: _startAnimation,
+    value: function value(commonStep, stepTo) {
       var _this4 = this;
 
       this.buttonNext.disabled = true;
       this.buttonPrev.disabled = true;
       this.buttonStop.disabled = true;
-      this.setDefaultzIndex();
+
+      this[_setDefaultzIndex]();
+
       var div;
       var step;
 
@@ -454,13 +509,16 @@ function () {
         step = -1;
       }
 
-      var coordsDiv = this.getCoords(div);
+      var coordsDiv = this[_getCoords](div);
+
       var divWidth = div.offsetWidth;
       var divHeight = div.offsetHeight;
       var divY = coordsDiv.top;
       var divX = coordsDiv.left;
       var nextDiv = this.blocks[commonStep + step];
-      var coordsNextDiv = this.getCoords(nextDiv);
+
+      var coordsNextDiv = this[_getCoords](nextDiv);
+
       var nextDivWidth = nextDiv.offsetWidth;
       var nextDivHeight = nextDiv.offsetHeight;
       var nextDivY = coordsNextDiv.top;
@@ -514,7 +572,7 @@ function () {
             canvas = _this4.canvas,
             padding = _this4.padding,
             config = _this4.config;
-        canvas.height = _this4.getCommonHeightdocument();
+        canvas.height = _this4[_getCommonHeightdocument]();
         ctx.clearRect(0, 0, canvas.width, canvas.height); // letf rectangle
 
         ctx.fillStyle = "rgba(0,0,0, ".concat(config.opacity || 0.7, ")");
@@ -567,7 +625,7 @@ function () {
         function setPositionPopup(startX, finishX, startY, finishY) {
           var centerHeightDiv = nextDivY + nextDivHeight / 2 - pH / 2;
 
-          if (bottomPos > this.getCommonHeightdocument()) {
+          if (bottomPos > this[_getCommonHeightdocument]()) {
             finishY = nextDivY - pH - offset - padding;
           } else if (topPos < nextDivY && bottomPos > windowH + finScroll && rightPos < windowW) {
             finishY = centerHeightDiv;
@@ -596,7 +654,7 @@ function () {
 
       var callbackPromise = function callbackPromise() {
         var callbackStep = new Promise(function (resolve) {
-          var call = _this4.config.steps[_this4.stepDescription] && _this4.config.steps[_this4.stepDescription].callback;
+          var call = _this4.config.steps && _this4.config.steps[_this4.stepDescription] && _this4.config.steps[_this4.stepDescription].callback;
 
           if (call) {
             Promise.resolve(call(nextDiv)).then(function () {
@@ -651,7 +709,7 @@ function () {
           clearInterval(_this4.animate);
 
           if (_this4.isHidePopup) {
-            _this4.hidePopup("hide");
+            _this4[_hidePopup]("hide");
           }
         }
 
@@ -672,6 +730,13 @@ function () {
     key: "isShowPopup",
     set: function set(value) {
       this._isShowPopup = value;
+    }
+  }, {
+    key: "_padding",
+    set: function set(value) {
+      if (this.padding > 15 || this.padding < 0) {
+        this.padding = 10;
+      }
     }
   }]);
 

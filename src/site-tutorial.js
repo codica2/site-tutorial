@@ -1,77 +1,96 @@
+const _addEventListeners = Symbol("addEventListeners");
+const _removeEventListeners = Symbol("removeEventListeners");
+const _mouseLeavePopup = Symbol("mouseLeavePopup");
+const _mouseMovePopup = Symbol("mouseMovePopup");
+const _keydownArrowRight = Symbol("keydownArrowRight");
+const _keydownArrowLeft = Symbol("keydownArrowLeft");
+const _outclick = Symbol("outclick");
+const _getCommonHeightdocument = Symbol("getCommonHeightdocument");
+const _updateTextButtons = Symbol("updateTextButtons");
+const _hidePopup = Symbol("hidePopup");
+const _buildDefaultPopup = Symbol("buildDefaultPopup");
+const _buildProgressBar = Symbol("buildProgressBar");
+const _updateProgress = Symbol("updateProgress");
+const _updateDescription = Symbol("updateDescription");
+const _sortBlocks = Symbol("sortBlocks");
+const _getCoords = Symbol("getCoords");
+const _getzIndex = Symbol("getzIndex");
+const _setDefaultzIndex = Symbol("setDefaultzIndex");
+const _startAnimation = Symbol("startAnimation");
+
 class SiteTutorial {
   constructor(config = {}) {
-    if (document.readyState == "interactive") {
-      const defaultConfig = {
-        time: 1000,
-        opacity: 0.7,
-        zIndex: 1000,
-        padding: 10,
-        outclick: false,
-        autoStart: false,
-        progressBar: null,
-        steps: null,
-        callback: null
-      };
+    const defaultConfig = {
+      time: 1000,
+      opacity: 0.7,
+      zIndex: 1000,
+      padding: 10,
+      outclick: false,
+      autoStart: false,
+      progressBar: null,
+      steps: null,
+      callback: null
+    };
 
-      this.config = {
-        ...defaultConfig,
-        ...config
-      };
+    this.body = document.body;
+    this.html = document.documentElement;
 
-      this.blocks = this.sortBlocks();
+    this.config = {
+      ...defaultConfig,
+      ...config
+    };
 
-      this.body = document.body;
-      this.html = document.documentElement;
+    this.blocks = this[_sortBlocks]();
+    this.padding = this.config.padding;
+    this.offset = 10;
+    this.time = this.config.time;
+    this.frame_rate = 0.06;
 
-      this.padding = this.config.padding;
+    this.animate;
+    this.commonStep = -1;
+    this.checkFinish = -1;
 
-      if (this.padding > 15 || this.padding < 0) {
-        this.padding = 10;
-      }
+    this.isStarted = false;
+    this.isHidePopup = false;
+    this._isShowPopup = false;
 
-      this.offset = 10;
-      this.time = this.config.time;
-      this.frame_rate = 0.06; // 60 FPS
+    this.startPositionScroll =
+      this.blocks[0].offsetTop - window.innerHeight / 2;
 
-      this.animate;
-      this.commonStep = -1;
-      this.checkFinish = -1;
+    if (!config.popup) this.body.appendChild(this[_buildDefaultPopup]());
 
-      this.isStarted = false;
-      this.isHidePopup = false;
-      this._isShowPopup = false;
+    this.popup = document.querySelector("#site-tutorial-control-panel");
 
-      this.startPositionScroll =
-        this.blocks[0].offsetTop - window.innerHeight / 2;
+    this.canvas = document.createElement("canvas");
+    this.canvas.setAttribute("id", "site-tutroial");
+    this.ctx = this.canvas.getContext("2d");
 
-      if (!config.popup) this.body.appendChild(this.buildDefaultPopup());
+    this.commonHeightDocument = this[_getCommonHeightdocument]();
 
-      this.popup = document.querySelector("#site-tutorial-control-panel");
+    this.next = this.next.bind(this);
+    this.prev = this.prev.bind(this);
+    this.stop = this.stop.bind(this);
+    this.start = this.start.bind(this);
+    this[_keydownArrowRight] = this[_keydownArrowRight].bind(this);
+    this[_keydownArrowLeft] = this[_keydownArrowLeft].bind(this);
+    this[_mouseMovePopup] = this[_mouseMovePopup].bind(this);
+    this[_mouseLeavePopup] = this[_mouseLeavePopup].bind(this);
+    this[_outclick] = this[_outclick].bind(this);
 
-      this.canvas = document.createElement("canvas");
-      this.canvas.setAttribute("id", "site-tutroial");
-      this.ctx = this.canvas.getContext("2d");
+    this.popup.style.position = "absolute";
+    this.popup.style.visibility = "hidden";
 
-      this.commonHeightDocument = this.getCommonHeightdocument();
-
-      this.defaultzIndexes = [];
-
-      this.next = this.next.bind(this);
-      this.prev = this.prev.bind(this);
-      this.keydownArrowRight = this.keydownArrowRight.bind(this);
-      this.keydownArrowLeft = this.keydownArrowLeft.bind(this);
-      this.mouseMovePopup = this.mouseMovePopup.bind(this);
-      this.mouseLeavePopup = this.mouseLeavePopup.bind(this);
-      this.outclick = this.outclick.bind(this);
-      this.handleStop = this.stop.bind(this);
-      this.start = this.start.bind(this);
-
-      this.initialize();
-    }
+    this.config.autoStart && this.initialize();
   }
 
   set isShowPopup(value) {
     this._isShowPopup = value;
+  }
+
+  set _padding(value) {
+    if (this.padding > 15 || this.padding < 0) {
+      this.padding = 10;
+    }
   }
 
   initialize() {
@@ -87,83 +106,76 @@ class SiteTutorial {
 
     body.appendChild(canvas);
 
-    popup.style.position = "absolute";
-    popup.style.visibility = "hidden";
-
     this.defaultPopLeft = -this.popup.offsetWidth + "px";
 
     popup.style.left = this.defaultPopLeft;
     popup.style.zIndex = this.canvas.style.zIndex + 1;
 
     this.buttonPrev = document.querySelector("#prev-site-tutorial");
-    this.buttonStart = document.querySelector("#start-site-tutorial");
     this.buttonNext = document.querySelector("#next-site-tutorial");
     this.buttonStop = document.querySelector("#stop-site-tutorial");
 
-    this.defaultButtonNextText = this.next.innerHTML;
+    this.defaultButtonNextText = this.buttonNext.innerHTML;
     this.stepDescription = 0;
 
     if (config.progressBar) {
       this.stepProgressBar = 0;
-      this.buildProgressBar();
+      this[_buildProgressBar]();
     }
 
-    this.getzIndex();
-
-    // button start
-    this.config.autoStart && this.start();
-    this.buttonStart.addEventListener("click", this.start);
+    this[_getzIndex]();
+    this.start();
   }
 
-  addEventListeners() {
+  [_addEventListeners]() {
     this.buttonNext.addEventListener("click", this.next);
-    document.addEventListener("keydown", this.keydownArrowRight);
+    document.addEventListener("keydown", this[_keydownArrowRight]);
 
     this.buttonPrev.addEventListener("click", this.prev);
-    this.body.addEventListener("keydown", this.keydownArrowLeft);
+    this.body.addEventListener("keydown", this[_keydownArrowLeft]);
 
-    this.popup.addEventListener("mousemove", this.mouseMovePopup);
-    this.popup.addEventListener("mouseleave", this.mouseLeavePopup);
+    this.popup.addEventListener("mousemove", this[_mouseMovePopup]);
+    this.popup.addEventListener("mouseleave", this[_mouseLeavePopup]);
 
-    this.buttonStop.addEventListener("click", this.handleStop);
+    this.buttonStop.addEventListener("click", this.stop);
 
-    document.addEventListener("click", this.outclick);
+    document.addEventListener("click", this[_outclick]);
   }
 
-  removeEventListeners() {
+  [_removeEventListeners]() {
     this.buttonNext.removeEventListener("click", this.next);
-    document.removeEventListener("keydown", this.keydownArrowRight);
+    document.removeEventListener("keydown", this[_keydownArrowRight]);
 
     this.buttonPrev.removeEventListener("click", this.prev);
-    this.body.removeEventListener("keydown", this.keydownArrowLeft);
+    this.body.removeEventListener("keydown", this[_keydownArrowLeft]);
 
-    this.popup.removeEventListener("mousemove", this.mouseMovePopup);
-    this.popup.removeEventListener("mouseleave", this.mouseLeavePopup);
+    this.popup.removeEventListener("mousemove", this[_mouseMovePopup]);
+    this.popup.removeEventListener("mouseleave", this[_mouseLeavePopup]);
 
-    this.buttonStop.removeEventListener("click", this.handleStop);
+    this.buttonStop.removeEventListener("click", this.stop);
 
-    document.removeEventListener("click", this.outclick);
+    document.removeEventListener("click", this[_outclick]);
   }
 
-  mouseLeavePopup() {
+  [_mouseLeavePopup]() {
     if (this.isHidePopup && this._isShowPopup && this.checkFinish === -1) {
-      this.hidePopup("hide");
+      this[_hidePopup]("hide");
       this.isShowPopup = false;
     }
   }
 
-  mouseMovePopup() {
+  [_mouseMovePopup]() {
     if (this.isHidePopup && this.checkFinish === -1) {
-      this.hidePopup("show");
+      this[_hidePopup]("show");
       this.isShowPopup = true;
     }
   }
 
-  keydownArrowRight(e) {
+  [_keydownArrowRight](e) {
     if (e.key === "ArrowRight") this.next();
   }
 
-  keydownArrowLeft(e) {
+  [_keydownArrowLeft](e) {
     if (e.key === "ArrowLeft") this.prev();
   }
 
@@ -173,37 +185,37 @@ class SiteTutorial {
       this.isStarted &&
       this.commonStep < this.blocks.length - 1
     ) {
-      this.hidePopup("show");
+      this[_hidePopup]("show");
       this.isShowPopup = true;
       this.stepProgressBar += 2;
       this.stepDescription += 1;
 
-      this.config.progressBar && this.updateProgress();
-      this.updateDescription();
-      this.startAnimation(this.commonStep, "next");
+      this.config.progressBar && this[_updateProgress]();
+      this[_updateDescription]();
+      this[_startAnimation](this.commonStep, "next");
 
       this.commonStep++;
     }
 
-    this.commonStep === this.blocks.length - 1 && stop();
-    this.updateTextButtons();
+    this.commonStep === this.blocks.length - 1 && this.stop();
+    this[_updateTextButtons]();
   }
 
   prev() {
     if (this.checkFinish === -1 && this.isStarted && this.commonStep > 0) {
-      this.hidePopup("show");
+      this[_hidePopup]("show");
       this.isShowPopup = true;
       this.stepProgressBar -= 2;
       this.stepDescription -= 1;
 
-      this.config.progressBar && this.updateProgress();
-      this.updateDescription();
-      this.startAnimation(this.commonStep, "prev");
+      this.config.progressBar && this[_updateProgress]();
+      this[_updateDescription]();
+      this[_startAnimation](this.commonStep, "prev");
 
       this.commonStep--;
     }
 
-    this.updateTextButtons();
+    this[_updateTextButtons]();
   }
 
   start() {
@@ -213,14 +225,14 @@ class SiteTutorial {
     this.body.style.overflow = "hidden";
 
     if (!this.isStarted) {
-      this.addEventListeners();
+      this[_addEventListeners]();
 
-      this.config.progressBar && this.updateProgress();
-      this.updateDescription();
-      this.updateTextButtons();
+      this.config.progressBar && this[_updateProgress]();
+      this[_updateDescription]();
+      this[_updateTextButtons]();
 
       window.scroll(0, this.startPositionScroll);
-      this.startAnimation(this.commonStep, "next");
+      this[_startAnimation](this.commonStep, "next");
       this.isStarted = true;
       this.commonStep++;
     }
@@ -246,13 +258,13 @@ class SiteTutorial {
       this.stepProgressBar = 0;
       this.stepDescription = 0;
 
-      this.removeEventListeners();
+      this[_removeEventListeners]();
 
       window.scroll(0, 0);
     }
   }
 
-  outclick() {
+  [_outclick](event) {
     let isClickInside = this.popup.contains(event.target);
 
     if (!isClickInside && this.config.outclick) {
@@ -260,7 +272,7 @@ class SiteTutorial {
     }
   }
 
-  getCommonHeightdocument() {
+  [_getCommonHeightdocument]() {
     return Math.max(
       this.body.scrollHeight,
       this.body.offsetHeight,
@@ -270,15 +282,15 @@ class SiteTutorial {
     );
   }
 
-  updateTextButtons() {
+  [_updateTextButtons]() {
     if (this.commonStep === this.blocks.length - 1) {
-      this.next.innerHTML = "finish";
+      this.buttonNext.innerHTML = "finish";
     } else {
-      this.next.innerHTML = this.defaultButtonNextText;
+      this.buttonNext.innerHTML = this.defaultButtonNextText;
     }
   }
 
-  hidePopup(status) {
+  [_hidePopup](status) {
     if (status === "hide") {
       this.popup.style.transitionDuration = "200ms";
       this.popup.style.opacity = 0.2;
@@ -287,7 +299,7 @@ class SiteTutorial {
     }
   }
 
-  buildDefaultPopup() {
+  [_buildDefaultPopup]() {
     const controlPanel = document.createElement("div");
     controlPanel.setAttribute("id", "site-tutorial-control-panel");
 
@@ -337,7 +349,7 @@ class SiteTutorial {
       progressWrap.appendChild(progressLine);
     }
 
-    if (this.config.progressBar.counter) {
+    if (this.config.progressBar && this.config.progressBar.counter) {
       const progressCounter = document.createElement("p");
       progressCounter.setAttribute("id", "progress-counter-site-tutorial");
 
@@ -347,7 +359,7 @@ class SiteTutorial {
     return controlPanel;
   }
 
-  buildProgressBar() {
+  [_buildProgressBar]() {
     this.progress = document.querySelector("#progress-site-tutorial");
     this.progress.style.width = "100%";
     this.progress.style.display = "flex";
@@ -386,7 +398,7 @@ class SiteTutorial {
     }
   }
 
-  updateProgress() {
+  [_updateProgress]() {
     this.progress.childNodes.forEach((elem, index) => {
       if (index % 2 === 0) {
         elem.style.backgroundColor = "";
@@ -404,7 +416,7 @@ class SiteTutorial {
     });
   }
 
-  updateDescription() {
+  [_updateDescription]() {
     this.isHidePopup = false;
     this.popup.style.transitionDuration = "";
 
@@ -446,7 +458,7 @@ class SiteTutorial {
     }
   }
 
-  sortBlocks() {
+  [_sortBlocks]() {
     const blocks = document.querySelectorAll("[site-tutorial-step]");
     const sortBlocks = [];
 
@@ -461,33 +473,34 @@ class SiteTutorial {
     );
   }
 
-  getCoords(elem) {
+  [_getCoords](elem) {
     var clientRect = elem.getBoundingClientRect();
 
     return {
-      top: Math.round(clientRect.top + scrollY),
-      left: Math.round(clientRect.left + scrollX)
+      top: Math.round(clientRect.top + window.scrollY),
+      left: Math.round(clientRect.left + window.scrollX)
     };
   }
 
-  getzIndex() {
+  [_getzIndex]() {
+    this.defaultzIndexes = [];
     this.blocks.forEach(elem => {
       this.defaultzIndexes.push(elem.style.zIndex);
     });
   }
 
-  setDefaultzIndex() {
+  [_setDefaultzIndex]() {
     this.defaultzIndexes.forEach((elem, index) => {
       this.blocks[index].style.zIndex = elem;
     });
   }
 
-  startAnimation(commonStep, stepTo) {
+  [_startAnimation](commonStep, stepTo) {
     this.buttonNext.disabled = true;
     this.buttonPrev.disabled = true;
     this.buttonStop.disabled = true;
 
-    this.setDefaultzIndex();
+    this[_setDefaultzIndex]();
 
     let div;
     let step;
@@ -510,7 +523,7 @@ class SiteTutorial {
       step = -1;
     }
 
-    const coordsDiv = this.getCoords(div);
+    const coordsDiv = this[_getCoords](div);
 
     let divWidth = div.offsetWidth;
     let divHeight = div.offsetHeight;
@@ -519,7 +532,7 @@ class SiteTutorial {
 
     let nextDiv = this.blocks[commonStep + step];
 
-    const coordsNextDiv = this.getCoords(nextDiv);
+    const coordsNextDiv = this[_getCoords](nextDiv);
 
     let nextDivWidth = nextDiv.offsetWidth;
     let nextDivHeight = nextDiv.offsetHeight;
@@ -585,7 +598,7 @@ class SiteTutorial {
     const draw = div => {
       const { ctx, canvas, padding, config } = this;
 
-      canvas.height = this.getCommonHeightdocument();
+      canvas.height = this[_getCommonHeightdocument]();
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -678,7 +691,7 @@ class SiteTutorial {
       function setPositionPopup(startX, finishX, startY, finishY) {
         let centerHeightDiv = nextDivY + nextDivHeight / 2 - pH / 2;
 
-        if (bottomPos > this.getCommonHeightdocument()) {
+        if (bottomPos > this[_getCommonHeightdocument]()) {
           finishY = nextDivY - pH - offset - padding;
         } else if (
           topPos < nextDivY &&
@@ -716,6 +729,7 @@ class SiteTutorial {
     const callbackPromise = () => {
       const callbackStep = new Promise(resolve => {
         const call =
+          this.config.steps &&
           this.config.steps[this.stepDescription] &&
           this.config.steps[this.stepDescription].callback;
 
@@ -771,7 +785,7 @@ class SiteTutorial {
         clearInterval(this.animate);
 
         if (this.isHidePopup) {
-          this.hidePopup("hide");
+          this[_hidePopup]("hide");
         }
       }
 

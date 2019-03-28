@@ -5,14 +5,15 @@ var gulp = require("gulp"),
 
 gulp.task("build", function() {
   return gulp
-    .src("develop/site-tutorial.js")
+    .src("src/site-tutorial.js")
     .pipe(
       babel({
-        presets: ["@babel/env"]
+        presets: ["@babel/preset-env"]
       })
     )
     .pipe(minify())
-    .pipe(gulp.dest("site-tutorial"));
+    .pipe(gulp.dest("example/site-tutorial"))
+    .pipe(gulp.dest("src/dist"));
 });
 
 gulp.task("start", function() {

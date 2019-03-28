@@ -1,39 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+    <link rel="stylesheet" href="css/test.css" />
+    <link rel="stylesheet" href="site-tutorial/site-tutorial-styles.css" />
+  </head>
 
-  <link rel="stylesheet" href="css/test.css" />
-  <link rel="stylesheet" href="site-tutorial/site-tutorial-styles.css">
-</head>
+  <body>
+    <button id="start-site-tutorial">Test</button>
 
-<body>
-  <button id="start-site-tutorial">Test</button>
+    <div class="first-test">
+      <div
+        site-tutorial-step="1"
+        tutorial-title="Title 1"
+        tutorial-text="Text"
+        class="tutorial div1"
+      ></div>
+      <div
+        site-tutorial-step="2"
+        tutorial-title="Title 2"
+        tutorial-text="Text"
+        class="tutorial div2"
+      ></div>
+      <div
+        site-tutorial-step="3"
+        tutorial-title="Title 3"
+        tutorial-text="Text"
+        class="tutorial div3"
+      ></div>
+    </div>
 
-  <div class="first-test">
-    <div site-tutorial-step="1" tutorial-title="Title 1" tutorial-text="Text" class="tutorial div1"></div>
-    <div site-tutorial-step="2" tutorial-title="Title 2" tutorial-text="Text" class="tutorial div2"></div>
-    <div site-tutorial-step="3" tutorial-title="Title 3" tutorial-text="Text" class="tutorial div3"></div>
-  </div>
+    <div class="second-test">
+      <div
+        site-tutorial-step="4"
+        tutorial-title="Title 4"
+        tutorial-text="Text"
+        class="tutorial div4"
+      ></div>
+      <div
+        site-tutorial-step="5"
+        tutorial-title="Title 5"
+        tutorial-text="Text"
+        class="tutorial div6"
+      ></div>
+      <div
+        site-tutorial-step="6"
+        tutorial-title="Title 6"
+        tutorial-text="Text"
+        class="tutorial div5"
+      ></div>
+      <div
+        site-tutorial-step="7"
+        tutorial-title="Title 7"
+        tutorial-text="Text"
+        class="tutorial div7"
+      ></div>
+      <div
+        site-tutorial-step="8"
+        tutorial-title="Title 8"
+        tutorial-text="Text"
+        class="tutorial div8"
+      ></div>
+      <div
+        site-tutorial-step="9"
+        tutorial-title="Title 9"
+        tutorial-text="Text"
+        class="tutorial div7"
+      ></div>
+    </div>
 
-  <div class="second-test">
-    <div site-tutorial-step="4" tutorial-title="Title 4" tutorial-text="Text" class="tutorial div4"></div>
-    <div site-tutorial-step="5" tutorial-title="Title 5" tutorial-text="Text" class="tutorial div6"></div>
-    <div site-tutorial-step="6" tutorial-title="Title 6" tutorial-text="Text" class="tutorial div5"></div>
-    <div site-tutorial-step="7" tutorial-title="Title 7" tutorial-text="Text" class="tutorial div7"></div>
-    <div site-tutorial-step="8" tutorial-title="Title 8" tutorial-text="Text" class="tutorial div8"></div>
-    <div site-tutorial-step="9" tutorial-title="Title 9" tutorial-text="Text" class="tutorial div7"></div>
-  </div>
+    <div class="third-test">
+      <div
+        site-tutorial-step="10"
+        tutorial-title="Title 10"
+        tutorial-text="Text"
+        class="tutorial div9"
+      ></div>
+    </div>
 
-  <div class="third-test">
-    <div site-tutorial-step="10" tutorial-title="Title 9" tutorial-text="Text" class="tutorial div9"></div>
-  </div>
-
-  <!-- <div class="control-panel" id="control-panel">
+    <!-- <div class="control-panel" id="control-panel">
     <div class="description">js
       <p id="desctirption-site-tutorial"></p>
 
@@ -54,8 +103,62 @@
     </div>
   </div> -->
 
-  <script src="develop/site-tutorial.js"></script>
-  <script src="develop/config-tutorial.js"></script>
-</body>
+    <script src="develop/site-tutorial.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", event => {
+        const configs = {
+          progressBar: {
+            color: "#FF3A41",
+            counter: true
+          },
+          steps: {
+            // 0: {
+            //   title: null,
+            //   text: null,
+            //   callback: function(nodeElem) {
+            //     return new Promise((resolve, reject) => {
+            //       const nodes = nodeElem.childNodes;
+            //       let elems = [];
+            //       let j = 0;
+            //       for (let i = 0; i < nodes.length; i++) {
+            //         if (nodes[i].style) {
+            //           nodes[i].style.visibility = "hidden";
+            //           elems.push(nodes[i]);
+            //         }
+            //       }
+            //       const mainInterval = setInterval(() => {
+            //         elems[j].style.visibility = "visible";
+            //         j++;
+            //         if (j === elems.length) {
+            //           resolve();
+            //           clearInterval(mainInterval);
+            //         }
+            //       }, 500);
+            //     });
+            //   }
+            // },
+            // 1: {
+            //   callback: function(nodeElem) {
+            //     nodeElem.style.zIndex = "4000";
+            //   }
+            // },
+            // 4: {
+            //   callback: function(nodeElem) {
+            //     nodeElem.style.zIndex = "4000";
+            //   }
+            // }
+          },
+          callback: function(nodeElem, step) {}
+        };
 
+        const tutorial = new SiteTutorial();
+
+        document
+          .querySelector("#start-site-tutorial")
+          .addEventListener("click", function() {
+            tutorial.initialize();
+          });
+      });
+    </script>
+  </body>
 </html>
