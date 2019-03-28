@@ -2,7 +2,7 @@
 
 Is easy, animated, a lot of functionality, flexible, step tutorial for your site.
 
-<p align="center"> 
+<p align="center">
  <img width="800px" src="images/gif-readme.gif" >
 </p>
 
@@ -13,21 +13,7 @@ npm install
 gulp start
 ```
 
-## Getting started
-
-Just download plugin and include to your HTML. 
-
-```html
-<!-- JS file -->
-<script src="path/to/site-tutorial.js"></script>
-```
-
-Site-Tutorial is very simple to use. 
-
-1. Choose node elements which you want to see highlighted and set it main attribute `site-tutorial-step="1"` with step parameter;
-2. Also you can add `tutorial-title="title"` and `tutorial-text="text"` attributes for title and text respectively;
-3. Create button for start tutorial and set `id="start-site-tutorial"`;
-4. Create js file and create object and pass options to argument `new SiteTutorial(options)`;
+## Usage
 
 <h3>HTML</h3>
 
@@ -41,14 +27,35 @@ Site-Tutorial is very simple to use.
 ```javascript
 var options = { time: 1500 };
 
-new SiteTutorial(options);
+var tutorial = new SiteTutorial();
+
+document.querySelector("elem")
+  .addEventListener("click", function() {
+    tutorial.initialize();
+  });
 ```
+
+## Getting started
+
+Just download plugin and include to your HTML.
+
+```html
+<!-- JS file -->
+<script src="path/to/site-tutorial.js"></script>
+```
+
+Site-Tutorial is very simple to use.
+
+1. Choose node elements which you want to see highlighted and set it main attribute `site-tutorial-step="1"` with step parameter;
+2. Also you can add `tutorial-title="title"` and `tutorial-text="text"` attributes for title and text respectively;
+3. Add event listener to node elem and call `tutorial.initialize()`;
+4. Create js file and create object and pass options to argument `new SiteTutorial(options)`;
 
 ## Popup
 
 You can create custom popup or use default popup. For add custom popup just pass parameter to options `popup: DOM element`. Default popup stay like default parameter, but for use it you need to connect styles. Link to styles - [download](https://www.google.com  "Default popup styles").
 
-```js 
+```js
 var options = { popup: document.getElementById("DOM-Element") };
 
 new SiteTutorial(options);
@@ -67,12 +74,12 @@ new SiteTutorial(options);
 
 You can connect progress bar, add `progressBar` property to oprions and pass the next parameters.
 
-```js 
-var options = {  
+```js
+var options = {
   progressBar: {
     color: "#FF3A41",
     counter: true
-  } 
+  }
 };
 
 new SiteTutorial(options);
@@ -129,7 +136,7 @@ Every step has one common callback and current step callback (see above). Async 
 
 ```js
 var options = {
-  callback: function(nodeElem) {      
+  callback: function(nodeElem) {
     return new Promise((resolve, reject) => {
       var timeOut = setInterval(() => {
         alert("Time is stop!")
