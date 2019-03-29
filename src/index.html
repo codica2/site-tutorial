@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+
+    <link rel="stylesheet" href="./css/site-tutorial-styles.css" />
+    <link rel="stylesheet" href="./css/test.css" />
+    <link rel="stylesheet" href="./site-tutorial.js" />
+  </head>
+
+  <body>
+    <button id="start-site-tutorial">Test</button>
+
+    <div class="first-test">
+      <div
+        site-tutorial-step="1"
+        tutorial-title="Title 1"
+        tutorial-text="Text"
+        class="tutorial div1"
+      ></div>
+      <div
+        site-tutorial-step="2"
+        tutorial-title="Title 2"
+        tutorial-text="Text"
+        class="tutorial div2"
+      ></div>
+      <div
+        site-tutorial-step="3"
+        tutorial-title="Title 3"
+        tutorial-text="Text"
+        class="tutorial div3"
+      ></div>
+    </div>
+
+    <div class="second-test">
+      <div
+        site-tutorial-step="4"
+        tutorial-title="Title 4"
+        tutorial-text="Text"
+        class="tutorial div4"
+      ></div>
+      <div
+        site-tutorial-step="5"
+        tutorial-title="Title 5"
+        tutorial-text="Text"
+        class="tutorial div6"
+      ></div>
+      <div
+        site-tutorial-step="6"
+        tutorial-title="Title 6"
+        tutorial-text="Text"
+        class="tutorial div5"
+      ></div>
+      <div
+        site-tutorial-step="7"
+        tutorial-title="Title 7"
+        tutorial-text="Text"
+        class="tutorial div7"
+      ></div>
+      <div
+        site-tutorial-step="8"
+        tutorial-title="Title 8"
+        tutorial-text="Text"
+        class="tutorial div8"
+      ></div>
+      <div
+        site-tutorial-step="9"
+        tutorial-title="Title 9"
+        tutorial-text="Text"
+        class="tutorial div7"
+      ></div>
+    </div>
+
+    <div class="third-test">
+      <div
+        site-tutorial-step="10"
+        tutorial-title="Title 10"
+        tutorial-text="Text"
+        class="tutorial div9"
+      ></div>
+    </div>
+
+    <script src="./js/site-tutorial.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", event => {
+        const configs = {
+          progressBar: {
+            color: "#FF3A41",
+            counter: true
+          }
+        };
+
+        const tutorial = new SiteTutorial();
+
+        document
+          .querySelector("#start-site-tutorial")
+          .addEventListener("click", function() {
+            tutorial.initialize();
+          });
+      });
+    </script>
+  </body>
+</html>
