@@ -1,0 +1,115 @@
+#site-tutorial-control-panel {
+  justify-content: space-around;
+  align-items: center;
+  width: 450px;
+  min-height: 140px;
+  border-radius: 2px;
+  background-color: #fff;
+  font-family: Raleway, sans-serif;
+  box-shadow: 0 0 15px 0 rgba(56, 56, 56, 0.288);
+}
+
+#site-tutorial-control-panel #description {
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  min-height: 90px;
+}
+
+#site-tutorial-control-panel #description p{
+  width: 90%;
+}
+
+#site-tutorial-control-panel #nav {
+  display: flex;
+  align-items: center;
+  background-color: #f9f9f9;
+  border-bottom-left-radius:  2px;
+  border-bottom-right-radius:  5px;
+  height: 50px;
+}
+
+#site-tutorial-control-panel #progress-wrap{
+  padding: 5px 20px;
+  box-sizing: border-box;
+  width: 70%;
+  display: flex;
+  justify-content: center;
+}
+
+#site-tutorial-control-panel #group-buttons{
+  display: flex;
+  height: 100%;
+  width: 30%;
+}
+
+#site-tutorial-control-panel #group-buttons button {
+  outline: none;
+  border: none;
+  text-transform: uppercase;
+  width: 50%;
+  height: 100%;
+  cursor: pointer;
+}
+
+#site-tutorial-control-panel #prev-site-tutorial:hover {
+  background-color: rgb(201, 201, 201);
+}
+
+#site-tutorial-control-panel #next-site-tutorial {
+  background-color: #FF3A41;
+  color: #fff;
+  border-bottom-right-radius:  2px;
+}
+
+#site-tutorial-control-panel #next-site-tutorial:hover {
+  background-color: rgb(255, 102, 107);
+}
+
+#site-tutorial-control-panel #next-site-tutorial:active {
+  background-color: #FF3A41;
+}
+
+#site-tutorial-control-panel #next-site-tutorial:disabled,
+#site-tutorial-control-panel #next-site-tutorial[disabled]{
+  background-color: rgb(175, 99, 101);
+}
+
+#progress-counter-site-tutorial {
+  margin: 0;
+  margin-left: 18px;
+}
+
+#stop-site-tutorial{
+  cursor: pointer;
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  right: 5px;
+  top: 5px;
+}
+
+#stop-site-tutorial:before, #stop-site-tutorial:after {
+  position: absolute;
+  left: 9px;
+  content: " ";
+  height: 20px;
+  width: 2px;
+  background-color: #FF3A41;
+}
+
+#stop-site-tutorial:before {
+  transform: rotate(45deg);
+}
+
+#stop-site-tutorial:after {
+  transform: rotate(-45deg);
+}
+
+#stop-site-tutorial:hover:after, #stop-site-tutorial:hover:before{
+  background-color: rgb(71, 20, 21);
+}
+
+#title-site-tutorial {
+  font-weight: 600;
+}
